@@ -2,10 +2,13 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, X, ChevronDown, ShoppingCart, User } from 'lucide-react';
 import Image from 'next/image';
 
 const Navbar = () => {
+  const pathname = usePathname();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
@@ -24,7 +27,7 @@ const Navbar = () => {
   };
 
   const mainLinks = [
-    { name: 'Home', href: '/', active: true },
+    { name: 'Home', href: '/' },
     { name: 'Men HRT', href: '/men-hrt' },
     { name: 'Woman HRT', href: '/woman-hrt' },
     { name: 'Weight Loss', href: '/weight-loss' },
@@ -38,28 +41,47 @@ const Navbar = () => {
     { name: 'Page 3', href: '/page-3' },
   ];
 
+  const isActiveLink = (href: string) => {
+    // Exact match for home, prefix match for other routes (so /men-hrt/x still highlights /men-hrt)
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
   return (
     <nav className="bg-[#f8f9fa] border-b border-gray-200 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo */}
-     <Image src="/logo.png" alt="Renrem Logo" width={100} height={40} className="object-contain" />
+          <Link href="/" className="shrink-0" aria-label="Go to homepage" onClick={closeAll}>
+            <Image
+              src="/logo.png"
+              alt="Renrem Logo"
+              width={100}
+              height={40}
+              className="object-contain"
+              priority
+            />
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
-            {mainLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`pb-1 transition-colors duration-200 ${
-                  link.active
-                    ? 'text-blue-600 border-b-2 border-blue-600'
-                    : 'text-gray-700 hover:text-blue-600'
-                }`}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {mainLinks.map((link) => {
+              const active = isActiveLink(link.href);
+
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`pb-1 transition-colors duration-200 ${
+                    active
+                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      : 'text-gray-700 hover:text-blue-600'
+                  }`}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
 
             {/* More Dropdown - Desktop */}
             <div
@@ -86,17 +108,23 @@ const Navbar = () => {
                 transition-all duration-200 z-50`}
                 role="menu"
               >
-                {moreLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="block px-6 py-3 text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors text-sm"
-                    onClick={() => setIsMoreOpen(false)}
-                    role="menuitem"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {moreLinks.map((link) => {
+                  const active = isActiveLink(link.href);
+
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={`block px-6 py-3 transition-colors text-sm ${
+                        active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                      }`}
+                      onClick={() => setIsMoreOpen(false)}
+                      role="menuitem"
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -130,18 +158,22 @@ const Navbar = () => {
         }`}
       >
         <div className="px-6 py-8 space-y-1">
-          {mainLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              className={`block px-5 py-4 text-lg font-medium rounded-2xl transition-colors ${
-                link.active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
-              }`}
-              onClick={closeAll}
-            >
-              {link.name}
-            </Link>
-          ))}
+          {mainLinks.map((link) => {
+            const active = isActiveLink(link.href);
+
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`block px-5 py-4 text-lg font-medium rounded-2xl transition-colors ${
+                  active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+                onClick={closeAll}
+              >
+                {link.name}
+              </Link>
+            );
+          })}
 
           {/* Mobile "More" Accordion */}
           <div className="pt-6 border-t mt-6">
@@ -167,16 +199,22 @@ const Navbar = () => {
               }`}
             >
               <div className="overflow-hidden">
-                {moreLinks.map((link) => (
-                  <Link
-                    key={link.name}
-                    href={link.href}
-                    className="block px-5 py-4 text-lg font-medium text-gray-700 hover:bg-gray-50 rounded-2xl transition-colors"
-                    onClick={closeAll}
-                  >
-                    {link.name}
-                  </Link>
-                ))}
+                {moreLinks.map((link) => {
+                  const active = isActiveLink(link.href);
+
+                  return (
+                    <Link
+                      key={link.name}
+                      href={link.href}
+                      className={`block px-5 py-4 text-lg font-medium rounded-2xl transition-colors ${
+                        active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
+                      }`}
+                      onClick={closeAll}
+                    >
+                      {link.name}
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           </div>
