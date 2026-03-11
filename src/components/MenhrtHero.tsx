@@ -8,58 +8,47 @@ const manrope = Manrope({
   display: "swap",
 });
 
-export default function MernhrtHero() {
-  return (
-    <section className="relative w-full min-h-[684px] md:min-h-screen flex items-center overflow-hidden">
+type HeroSectionProps = {
+  bgImage: string;
+  title: string;
+  description: string;
+  minHeightClass?: string;
+  overlayClassName?: string;
+};
 
-      {/* Background Image */}
+export default function DynamicHeroSection({
+  bgImage,
+  title,
+  description,
+  minHeightClass = "h-[70vh]",
+  overlayClassName = "bg-[#10101063]",
+}: HeroSectionProps) {
+  return (
+    <section
+      className={`relative w-full ${minHeightClass} flex items-center overflow-hidden`}
+    >
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: "url('/menhtrt-hero.png')", 
+          backgroundImage: `url('${bgImage}')`,
         }}
       />
 
-      {/* Left Dark Gradient Overlay */}
-      <div className="absolute inset-0 bg-[#10101063]" />
+      <div className={`absolute inset-0 ${overlayClassName}`} />
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 sm:px-12 lg:px-20 w-full">
+      <div className="relative z-10 mx-auto w-full container px-6 sm:px-12 lg:px-0">
         <div className="max-w-2xl">
-
-          {/* Heading */}
           <h1
-            className={`${manrope.className}
-            text-white
-            uppercase
-            font-bold
-            leading-[115%]
-            tracking-tight
-            text-[38px]
-            sm:text-[52px]
-            lg:text-[72px]
-            mb-6`}
+            className={`${manrope.className} mb-6 text-[38px] font-bold uppercase leading-[115%] tracking-tight text-white sm:text-[52px] lg:text-[72px]`}
           >
-            FEEL LIKE
-            <br />
-            YOU AGAIN
+            {title}
           </h1>
 
-          {/* Subtitle */}
           <p
-            className={`${manrope.className}
-            text-white/85
-            text-sm
-            sm:text-base
-            lg:text-lg
-            font-normal
-            max-w-xl
-            leading-[150%]`}
+            className={`${manrope.className} max-w-xl text-sm font-normal leading-[150%] text-white/85 sm:text-base lg:text-lg`}
           >
-            TRT isn’t just about gym gains. It’s about having more
-            energy & presence for the people who matter most.
+            {description}
           </p>
-
         </div>
       </div>
     </section>

@@ -40,11 +40,11 @@ export function Faq() {
   const [openIndex, setOpenIndex] = React.useState<number | null>(0);
 
   return (
-    <section className="bg-white py-12 sm:py-16 lg:py-20">
+    <section className=" py-12 sm:py-16 lg:py-20">
       {/* Container */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         {/* Content width */}
-        <div className="mx-auto max-w-3xl">
+        <div className="mx-auto ">
           {/* Header */}
           <div className="mb-6 sm:mb-8">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl lg:text-4xl">
@@ -60,12 +60,12 @@ export function Faq() {
               return (
                 <div
                   key={idx}
-                  className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm"
+                  className="overflow-hidden "
                 >
                   <button
                     type="button"
                     onClick={() => setOpenIndex(isOpen ? null : idx)}
-                    className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors hover:bg-gray-50 sm:px-6 sm:py-5"
+                    className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left transition-colors border-b border-[#C3C3C3] sm:px-6 sm:py-5"
                   >
                     <span className="text-sm font-semibold text-gray-900 sm:text-base">
                       {faq.question}
@@ -79,7 +79,7 @@ export function Faq() {
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-gray-200 bg-gray-50 px-4 py-4 sm:px-6 sm:py-5">
+                    <div className="border-t border-gray-200 px-4 py-4 sm:px-6 sm:py-5">
                       <p className="text-sm leading-6 text-gray-700 sm:text-base">
                         {faq.answer}
                       </p>
