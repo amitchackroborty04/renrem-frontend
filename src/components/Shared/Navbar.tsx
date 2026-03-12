@@ -49,21 +49,21 @@ const Navbar = () => {
   return (
     <nav className="bg-[#f8f9fa] border-b border-gray-200 sticky top-0 z-50">
       <div className="container mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center py-2">
           {/* Logo */}
           <Link href="/" className="shrink-0" aria-label="Go to homepage" onClick={closeAll}>
             <Image
-              src="/logo.png"
+              src="/newlogo.png"
               alt="Renrem Logo"
-              width={100}
-              height={40}
-              className="object-contain"
+              width={1000}
+              height={1000}
+              className="object-cover w-[100px] h-[80px]"
               priority
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8 text-sm font-medium">
+          <div className="hidden lg:flex items-center gap-8 text-base text-[#131313] font-medium">
             {mainLinks.map((link) => {
               const active = isActiveLink(link.href);
 
@@ -90,7 +90,7 @@ const Navbar = () => {
             >
               <button
                 type="button"
-                className="flex items-center gap-1 text-gray-700 hover:text-blue-600 transition-colors duration-200"
+                className="flex items-center gap-1 font-medium  text-[16px] text-[#131313] hover:text-blue-600 transition-colors duration-200"
                 onClick={() => setIsMoreOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={isMoreOpen}
@@ -114,7 +114,7 @@ const Navbar = () => {
                     <Link
                       key={link.name}
                       href={link.href}
-                      className={`block px-6 py-3 transition-colors text-sm ${
+                      className={`block px-6 py-3 transition-colors text-base text-[#131313] ${
                         active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                       }`}
                       onClick={() => setIsMoreOpen(false)}
@@ -130,9 +130,11 @@ const Navbar = () => {
 
           {/* Right Side Icons */}
           <div className="hidden lg:flex items-center gap-3">
+            <Link href='/my-cart'>
             <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
               <ShoppingCart className="w-5 h-5 text-blue-600" />
             </button>
+            </Link>
             <Link href='/profile/edit-profile'>
             <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
               <User className="w-5 h-5 text-blue-600" />
