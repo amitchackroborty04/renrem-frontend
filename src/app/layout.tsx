@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import AppProvider from "@/provider/AppProvider";
+import AuthProvider from "@/provider/AuthProvider";
 
 const manrope = Manrope({
   subsets: ["latin"],
-  weight: ["200","300","400","500","600","700","800"],
+  weight: ["200", "300", "400", "500", "600", "700", "800"],
   variable: "--font-manrope",
 });
 
@@ -21,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${manrope.variable} font-sans antialiased`}>
-        {children}
+        <AppProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </AppProvider>
       </body>
     </html>
   );
