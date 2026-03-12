@@ -37,7 +37,7 @@ export default function DynamicHeroSection({
       <div className={`absolute inset-0 ${overlayClassName}`} />
 
       <div className="relative z-10 mx-auto w-full container px-6 sm:px-12 lg:px-0">
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
           <h1
             className={`${manrope.className} mb-6 text-[38px] font-bold uppercase leading-[115%] tracking-tight text-white sm:text-[52px] lg:text-[72px]`}
           >
