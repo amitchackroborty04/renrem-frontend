@@ -9,13 +9,15 @@ import Image from 'next/image';
 const Navbar = () => {
   const pathname = usePathname();
 
+  // Decode encoded URI (e.g. %20 → space) so dynamic links match correctly
+  const decodedPathname = decodeURIComponent(pathname);
+
   const [isOpen, setIsOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen((v) => {
       const next = !v;
-      // when closing the mobile menu, also close "More"
       if (!next) setIsMoreOpen(false);
       return next;
     });
@@ -28,11 +30,11 @@ const Navbar = () => {
 
   const mainLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Men HRT', href: '/men-hrt' },
-    { name: 'Woman HRT', href: '/woman-hrt' },
-    { name: 'Weight Loss', href: '/weight-loss' },
-    { name: 'IV Therapy', href: '/iv-therapy' },
-    { name: 'Peptides', href: '/peptides' },
+    { name: 'Men HRT', href: `/product-categorys/${'Men HRT'}` },
+    { name: 'Woman HRT', href: `/product-categorys/${'Women HRT'}` },
+    { name: 'Weight Loss', href: `/product-categorys/${'Weight Loss'}` },
+    { name: 'IV Therapy', href: `/product-categorys/${'IV Therapy'}` },
+    { name: 'Peptides', href: `/product-categorys/${'Peptides'}` },
   ];
 
   const moreLinks = [
@@ -42,8 +44,8 @@ const Navbar = () => {
   ];
 
   const isActiveLink = (href: string) => {
-    if (href === '/') return pathname === '/';
-    return pathname === href || pathname.startsWith(`${href}/`);
+    if (href === '/') return decodedPathname === '/';
+    return decodedPathname === href || decodedPathname.startsWith(`${href}/`);
   };
 
   return (
@@ -66,7 +68,6 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center gap-8 text-base text-[#131313] font-medium">
             {mainLinks.map((link) => {
               const active = isActiveLink(link.href);
-
               return (
                 <Link
                   key={link.name}
@@ -90,7 +91,7 @@ const Navbar = () => {
             >
               <button
                 type="button"
-                className="flex items-center gap-1 font-medium  text-[16px] text-[#131313] hover:text-blue-600 transition-colors duration-200"
+                className="flex items-center gap-1 font-medium text-[16px] text-[#131313] hover:text-blue-600 transition-colors duration-200"
                 onClick={() => setIsMoreOpen((v) => !v)}
                 aria-haspopup="menu"
                 aria-expanded={isMoreOpen}
@@ -109,7 +110,6 @@ const Navbar = () => {
               >
                 {moreLinks.map((link) => {
                   const active = isActiveLink(link.href);
-
                   return (
                     <Link
                       key={link.name}
@@ -131,14 +131,14 @@ const Navbar = () => {
           {/* Right Side Icons */}
           <div className="hidden lg:flex items-center gap-3">
             <Link href='/my-cart'>
-            <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
-              <ShoppingCart className="w-5 h-5 text-blue-600" />
-            </button>
+              <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
+                <ShoppingCart className="w-5 h-5 text-blue-600" />
+              </button>
             </Link>
             <Link href='/profile/edit-profile'>
-            <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
-              <User className="w-5 h-5 text-blue-600" />
-            </button>
+              <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
+                <User className="w-5 h-5 text-blue-600" />
+              </button>
             </Link>
           </div>
 
@@ -163,7 +163,6 @@ const Navbar = () => {
         <div className="px-6 py-8 space-y-1">
           {mainLinks.map((link) => {
             const active = isActiveLink(link.href);
-
             return (
               <Link
                 key={link.name}
@@ -189,9 +188,7 @@ const Navbar = () => {
             >
               <span className="text-xs font-semibold tracking-widest text-gray-500">MORE</span>
               <ChevronDown
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  isMoreOpen ? 'rotate-180' : ''
-                }`}
+                className={`w-5 h-5 text-gray-500 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`}
               />
             </button>
 
@@ -204,7 +201,6 @@ const Navbar = () => {
               <div className="overflow-hidden">
                 {moreLinks.map((link) => {
                   const active = isActiveLink(link.href);
-
                   return (
                     <Link
                       key={link.name}
@@ -224,12 +220,16 @@ const Navbar = () => {
 
           {/* Mobile Icons */}
           <div className="flex gap-4 pt-8">
-            <button className="flex-1 flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
-              <ShoppingCart className="w-5 h-5" /> Cart
-            </button>
-            <button className="flex-1 flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
-              <User className="w-5 h-5" /> Account
-            </button>
+            <Link href='/my-cart' className="flex-1">
+              <button className="w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
+                <ShoppingCart className="w-5 h-5" /> Cart
+              </button>
+            </Link>
+            <Link href='/profile/edit-profile' className="flex-1">
+              <button className="w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
+                <User className="w-5 h-5" /> Account
+              </button>
+            </Link>
           </div>
         </div>
       </div>

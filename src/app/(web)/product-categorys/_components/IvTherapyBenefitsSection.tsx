@@ -1,0 +1,299 @@
+"use client";
+
+import { useState } from "react";
+import Image from "next/image";
+
+interface TreatmentQuestion {
+  _id: string;
+  question: string;
+  options: string[];
+  answare: string;
+}
+
+interface TreatmentBenefit {
+  _id: string;
+  title: string;
+  category: string;
+  description: string;
+  treatmentQuestions?: TreatmentQuestion[];
+}
+
+interface IvTherapyBenefitsSectionProps {
+  benefits?: {
+    statusCode: number;
+    success: boolean;
+    message: string;
+    data: TreatmentBenefit[];
+  };
+}
+
+export default function IvTherapyBenefitsSection({
+  benefits,
+}: IvTherapyBenefitsSectionProps) {
+  const benefitItems = benefits?.data || [];
+
+  // ── Quiz state ──────────────────────────────────────────────────────
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState<
+    Record<string, string>
+  >({});
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  // Flatten all questions from all benefits
+  const allQuestions: (TreatmentQuestion & { benefitTitle: string })[] =
+    benefitItems.flatMap((item) =>
+      (item.treatmentQuestions || []).map((q) => ({
+        ...q,
+        benefitTitle: item.title,
+      })),
+    );
+
+  const currentQuestion = allQuestions[currentQuestionIndex];
+  const totalQuestions = allQuestions.length;
+  const progress =
+    totalQuestions > 0
+      ? Math.round((currentQuestionIndex / totalQuestions) * 100)
+      : 0;
+
+  const handleOptionSelect = (questionId: string, option: string) => {
+    setSelectedAnswers((prev) => ({ ...prev, [questionId]: option }));
+  };
+
+  const handleNext = () => {
+    if (currentQuestionIndex < totalQuestions - 1) {
+      setCurrentQuestionIndex((prev) => prev + 1);
+    } else {
+      setIsCompleted(true);
+    }
+  };
+
+  const handleBack = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex((prev) => prev - 1);
+    }
+  };
+
+  const handleClose = () => {
+    setShowQuiz(false);
+    setCurrentQuestionIndex(0);
+    setSelectedAnswers({});
+    setIsCompleted(false);
+  };
+
+  const isCurrentAnswered = currentQuestion
+    ? !!selectedAnswers[currentQuestion._id]
+    : false;
+
+  // ── Render ──────────────────────────────────────────────────────────
+  return (
+    <>
+      <section className="w-full py-12 sm:py-16 lg:py-20">
+        <div className="mx-auto container px-4 sm:px-6 lg:px-8">
+          {/* Content */}
+          <div className="mt-10 space-y-8 sm:mt-12 sm:space-y-10">
+            {benefitItems.length > 0 ? (
+              benefitItems.map((item) => (
+                <div key={item._id}>
+                  <h3 className="text-[28px] font-semibold leading-tight text-[#131313] sm:text-[38px] lg:text-[40px]">
+                    {item.title}
+                  </h3>
+                  <p className="mt-4 text-sm leading-7 text-[#222] sm:text-[18px]">
+                    {item.description}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-gray-500">
+                No benefits available for this category.
+              </p>
+            )}
+          </div>
+
+          {/* Button */}
+          <div className="mt-10 flex justify-center sm:mt-14">
+            <button
+              type="button"
+              onClick={() => setShowQuiz(true)}
+              className="inline-flex h-[48px] min-w-[220px] items-center justify-center rounded-full bg-[#1239e6] px-8 text-sm font-medium text-white transition hover:bg-[#0f31c9] sm:h-[54px] sm:min-w-[260px]"
+            >
+              Customize Your Treatment
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Quiz Modal ─────────────────────────────────────────────────── */}
+      {showQuiz && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.45)" }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) handleClose();
+          }}
+        >
+          {/* ── Completed State ── */}
+          {isCompleted ? (
+            <div className="relative w-full max-w-[820px] rounded-2xl bg-[#f0f2f5] shadow-2xl overflow-hidden">
+              {/* Close button */}
+              <button
+                onClick={handleClose}
+                className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md text-red-600 hover:text-red-800 transition-all text-2xl font-bold"
+              >
+                ×
+              </button>
+
+              <div className="flex flex-col md:flex-row items-stretch">
+                {/* Left — Text */}
+                <div className="flex-1 px-10 py-12 md:py-16">
+                  <h2 className="mb-5 text-[26px] font-bold leading-tight text-[#131313] sm:text-[30px] lg:text-[34px]">
+                    You have low testosterone
+                  </h2>
+                  <p className="mb-6 text-[17px] font-semibold leading-snug text-[#131313] sm:text-[20px]">
+                    You&apos;re not alone. Over 10 million men face low
+                    testosterone symptoms.
+                  </p>
+                  <ul className="space-y-2.5 text-[14px] text-[#444] sm:text-[15px]">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#1239e6] font-bold">•</span>
+                      Relief starts with understanding your options.
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#1239e6] font-bold">•</span>
+                      Start feeling like yourself again in 4-6 weeks or less
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#1239e6] font-bold">•</span>
+                      The clinic trusted by over +350,000 men
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 text-[#1239e6] font-bold">•</span>
+                      Easy &amp; affordable online treatment
+                    </li>
+                  </ul>
+
+                  <button
+                    onClick={handleClose}
+                    className="mt-10 inline-flex h-[48px] min-w-[160px] items-center justify-center rounded-full bg-[#1239e6] px-8 text-sm font-medium text-white transition hover:bg-[#0f31c9]"
+                  >
+                    Get Started
+                  </button>
+                </div>
+
+                {/* Right — Image */}
+                <div className="w-full md:w-[340px] lg:w-[360px] flex-shrink-0">
+                  <div className="relative h-[260px] w-full md:h-full">
+                    <Image
+                      src="/images/teststoron.jpg"
+                      alt="Healthcare dashboard"
+                      fill
+                      className="object-cover rounded-b-2xl md:rounded-b-none md:rounded-r-2xl"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : (
+            /* ── Quiz Questions ── */
+            <div
+              className="relative w-full max-w-[600px] rounded-2xl bg-[#f0f2f5] px-8 py-10 shadow-2xl"
+              style={{ maxHeight: "90vh", overflowY: "auto" }}
+            >
+              {/* Close button */}
+              <button
+                onClick={handleClose}
+                className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-600 hover:bg-gray-200 hover:text-gray-700 transition-all text-2xl font-semibold shadow-md"
+              >
+                ×
+              </button>
+
+              {/* Progress bar */}
+              <div className="my-10">
+                <div className="mb-1 flex items-center justify-between text-xs text-gray-400 ">
+                  <span>
+                    Question {currentQuestionIndex + 1} of {totalQuestions}
+                  </span>
+                  <span>{progress}%</span>
+                </div>
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div
+                    className="h-full rounded-full bg-[#1239e6] transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Question */}
+              <h2 className="mb-2 text-center text-[20px] font-bold leading-snug text-[#131313] sm:text-[22px]">
+                {currentQuestion?.question}
+              </h2>
+              <p className="mb-8 text-center text-sm text-gray-500">
+                Let&apos;s get you back to feeling your best.
+              </p>
+
+              {/* Options */}
+              <div className="space-y-3">
+                {currentQuestion?.options.map((option, i) => {
+                  const isSelected =
+                    selectedAnswers[currentQuestion._id] === option;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() =>
+                        handleOptionSelect(currentQuestion._id, option)
+                      }
+                      className="flex w-full items-center gap-4 rounded-xl bg-white px-5 py-4 text-left transition-all"
+                      style={{
+                        border: isSelected
+                          ? "2px solid #1239e6"
+                          : "1.5px solid #d1d5db",
+                      }}
+                    >
+                      {/* Radio circle */}
+                      <div
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
+                        style={{
+                          borderColor: isSelected ? "#1239e6" : "#9ca3af",
+                          background: "transparent",
+                        }}
+                      >
+                        {isSelected && (
+                          <div className="h-3 w-3 rounded-full bg-[#1239e6]" />
+                        )}
+                      </div>
+                      <span className="text-[15px] text-[#222]">{option}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Navigation */}
+              <div className="mt-8 flex gap-3">
+                {currentQuestionIndex > 0 && (
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="flex-1 h-[48px] rounded-full border border-gray-300 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                  >
+                    Back
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={handleNext}
+                  disabled={!isCurrentAnswered}
+                  className="flex-1 h-[48px] rounded-full bg-[#1239e6] text-sm font-medium text-white transition hover:bg-[#0f31c9] disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {currentQuestionIndex === totalQuestions - 1
+                    ? "Submit"
+                    : "Next"}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}
