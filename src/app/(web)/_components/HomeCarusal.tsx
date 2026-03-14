@@ -1,50 +1,46 @@
 "use client";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 import React, { useState } from "react";
 
-const items = [
-  {
-    id: 1,
-    name: "NAD+",
-    subtitle: "works in 15 minutes",
-    image: "/images/backImage.jpg",
-  },
-  {
-    id: 2,
-    name: "MIC-B12",
-    subtitle: "works in 15 minutes",
-    image: "/images/backImage.jpg",
-  },
-  {
-    id: 3,
-    name: "Glutathione",
-    subtitle: "works in 15 minutes",
-    image: "/images/backImage.jpg",
-  },
-  {
-    id: 4,
-    name: "Vitamin C",
-    subtitle: "works in 15 minutes",
-    image: "/images/backImage.jpg",
-  },
-  {
-    id: 5,
-    name: "B-Complex",
-    subtitle: "works in 15 minutes",
-    image: "/images/backImage.jpg",
-  },
-];
+interface Product {
+  _id: string;
+  name: string;
+  description: string;
+  image: string[];
+}
 
 const VISIBLE = 3;
 
 const HomeCarusal = () => {
   const [startIndex, setStartIndex] = useState(0);
 
+  const { data: productData } = useQuery({
+    queryKey: ["product"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/product`,
+      );
+      const json = await res.json();
+      if (!res.ok || !json.success)
+        throw new Error(json.message || "Failed to fetch products");
+      return json.data; // 🔹 data is in json.data
+    },
+  });
+
+  const items = productData || []; // use fetched data or empty array
+
   const canPrev = startIndex > 0;
   const canNext = startIndex + VISIBLE < items.length;
 
-  const prev = () => { if (canPrev) setStartIndex((i) => i - 1); };
-  const next = () => { if (canNext) setStartIndex((i) => i + 1); };
+  const prev = () => {
+    if (canPrev) setStartIndex((i) => i - 1);
+  };
+
+  const next = () => {
+    if (canNext) setStartIndex((i) => i + 1);
+  };
 
   const visible = items.slice(startIndex, startIndex + VISIBLE);
 
@@ -52,31 +48,35 @@ const HomeCarusal = () => {
     <section className="py-[80px] container mx-auto">
       {/* Cards Row */}
       <div className="grid grid-cols-3 gap-6 mb-6">
-        {visible.map((item) => (
-          <div key={item.id} className="flex flex-col gap-3 cursor-pointer group">
-            {/* Image Box */}
-            <div className="relative w-full aspect-square rounded-sm overflow-hidden">
-              <Image
-                src={item.image}
-                alt={item.name}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
+        {visible.map((item: Product) => (
+          <Link href={`/product/${item?._id}`} key={item._id}>
+            <div
+              className="flex flex-col gap-3 cursor-pointer group"
+            >
+              {/* Image Box */}
+              <div className="relative w-full aspect-square rounded-sm overflow-hidden">
+                <Image
+                  src={item.image[0]} // use first image from API array
+                  alt={item.name}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
 
-            {/* Text */}
-            <div>
-              <h3
-                className="text-[22px] font-light text-[#1a1a1a] tracking-tight"
-                style={{ fontFamily: "Georgia, serif" }}
-              >
-                {item.name}
-              </h3>
-              <p className="text-xs text-[#888] mt-0.5 font-light tracking-wide">
-                {item.subtitle}
-              </p>
+              {/* Text */}
+              <div>
+                <h3
+                  className="text-[22px] font-light text-[#1a1a1a] tracking-tight"
+                  style={{ fontFamily: "Georgia, serif" }}
+                >
+                  {item.name}
+                </h3>
+                <p className="text-xs text-[#888] mt-0.5 font-light tracking-wide">
+                  {item.description} {/* or item.subtitle if needed */}
+                </p>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -93,7 +93,13 @@ const HomeCarusal = () => {
           ].join(" ")}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M10 3L5 8L10 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M10 3L5 8L10 13"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
 
@@ -108,7 +114,13 @@ const HomeCarusal = () => {
           ].join(" ")}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M6 3L11 8L6 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M6 3L11 8L6 13"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </button>
       </div>
