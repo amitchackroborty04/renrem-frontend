@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
+import Link from "next/link";
 
 type CartItem = {
   id: number;
@@ -205,13 +206,14 @@ export default function CartSection() {
                   ${total.toFixed(2)}
                 </span>
               </div>
-
+              <Link href="/checkout">
               <button
                 type="button"
                 className="mt-6 inline-flex h-[48px] w-full items-center justify-center rounded-[8px] bg-[#0024DA] px-6 text-base font-medium text-white transition hover:bg-[#0f31c9] "
               >
                 Checkout
               </button>
+              </Link>
             </div>
           </div>
         </div>
