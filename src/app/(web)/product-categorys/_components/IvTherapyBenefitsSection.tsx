@@ -95,12 +95,19 @@ export default function IvTherapyBenefitsSection({
             {benefitItems.length > 0 ? (
               benefitItems.map((item) => (
                 <div key={item._id}>
-                  <h3 className="text-[28px] font-semibold leading-tight text-[#131313] sm:text-[38px] lg:text-[40px]">
-                    {item.title}
-                  </h3>
-                  <p className="mt-4 text-sm leading-7 text-[#222] sm:text-[18px]">
-                    {item.description}
-                  </p>
+                  <h3
+                    className="text-[28px] font-semibold leading-tight text-[#131313] sm:text-[38px] lg:text-[40px]"
+                    dangerouslySetInnerHTML={{
+                      __html: item.title || "",
+                    }}
+                  />
+
+                  <p
+                    className="mt-4 text-sm leading-7 text-[#222] sm:text-[18px]"
+                    dangerouslySetInnerHTML={{
+                      __html: item.description || "",
+                    }}
+                  />
                 </div>
               ))
             ) : (
