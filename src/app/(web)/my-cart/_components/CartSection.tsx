@@ -276,7 +276,7 @@ export default function CartSection() {
                         </p>
 
                         <p className="mt-3 text-[28px] font-medium text-[#1f1f1f] sm:text-[32px] lg:text-[24px]">
-                          ${item.price.toFixed(2)}
+                          ${item?.price?.toFixed(2)}
                         </p>
 
                         <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
