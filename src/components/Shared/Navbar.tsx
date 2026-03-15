@@ -109,7 +109,7 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-200 bg-[#f8f9fa]">
-      <div className="container mx-auto px-4 lg:px-8">
+      <div className="container mx-auto px-4 lg:px-0">
         <div className="flex items-center justify-between py-2">
           {/* Logo */}
           <Link href="/" className="shrink-0" aria-label="Go to homepage" onClick={closeAll}>
