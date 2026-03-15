@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -21,6 +21,7 @@ interface CartItem {
   id: string;
   productId: string;
   name: string;
+  description: string;
   price: number;
   image: string;
   size: string;
@@ -36,39 +37,23 @@ interface Cart {
 }
 
 // ─── Helper: Save to localStorage ────────────────────────────────────────────
-function saveToCart(newItem: CartItem) {
-  const existing = localStorage.getItem("cart");
-  const cart: Cart = existing
-    ? JSON.parse(existing)
-    : { items: [], subtotal: 0, total: 0, totalItems: 0, savedAt: "" };
+function saveToCheckoutCart(newItem: CartItem) {
+  const subtotal = newItem.price * newItem.quantity;
+  const cart: Cart = {
+    items: [newItem],
+    subtotal: parseFloat(subtotal.toFixed(2)),
+    total: parseFloat(subtotal.toFixed(2)),
+    totalItems: newItem.quantity,
+    savedAt: new Date().toISOString(),
+  };
 
-  // Check if item with same productId + size already exists
-  const existingIndex = cart.items.findIndex(
-    (i) => i.productId === newItem.productId && i.size === newItem.size
-  );
-
-  if (existingIndex !== -1) {
-    cart.items[existingIndex].quantity += 1;
-  } else {
-    cart.items.push(newItem);
-  }
-
-  const subtotal = cart.items.reduce(
-    (sum, i) => sum + i.price * i.quantity,
-    0
-  );
-
-  cart.subtotal = parseFloat(subtotal.toFixed(2));
-  cart.total = parseFloat(subtotal.toFixed(2));
-  cart.totalItems = cart.items.reduce((sum, i) => sum + i.quantity, 0);
-  cart.savedAt = new Date().toISOString();
-
-  localStorage.setItem("cart", JSON.stringify(cart));
+  localStorage.setItem("checkoutCart", JSON.stringify(cart));
 }
 
 function ProductsDetails() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
+  const queryClient = useQueryClient();
 
   const router = useRouter();
   const params = useParams();
@@ -110,18 +95,23 @@ function ProductsDetails() {
   // ─── Buy Now Handler ──────────────────────────────────────────────────
   const handleBuyNow = () => {
     if (!singleProductData) return;
+    if (singleProductData?.size?.length && !selectedSize) {
+      toast.error("Please select a size first.");
+      return;
+    }
 
     const cartItem: CartItem = {
       id: crypto.randomUUID(),           // unique cart entry id
       productId: singleProductData._id,
       name: singleProductData.name,
+      description: singleProductData.description || "",
       price: singleProductData.price,
       image: singleProductData.image?.[0] || "",
       size: selectedSize,
       quantity: 1,
     };
 
-    saveToCart(cartItem);
+    saveToCheckoutCart(cartItem);
     router.push("/checkout");
   };
 
@@ -146,7 +136,9 @@ function ProductsDetails() {
       return res.json();
     },
     onSuccess : () => {
-      toast.success('Add to cart Successfully!')
+      toast.success('Add to cart Successfully!');
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
 
     onError : (err) => {

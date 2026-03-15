@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Menu, X, ChevronDown, ShoppingCart, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
+import { useQuery } from '@tanstack/react-query';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
+type CartCountResponse = {
+  success: boolean;
+  message?: string;
+  data?: {
+    totalItems?: number;
+  };
+};
 
 const Navbar = () => {
   const pathname = usePathname();
@@ -25,6 +34,32 @@ const Navbar = () => {
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
   const session = useSession();
   const isLoggedIn = session.status === 'authenticated';
+  const token = session.data?.user?.accessToken;
+
+  const { data: cartCount = 0 } = useQuery<number>({
+    queryKey: ['cart-count'],
+    queryFn: async () => {
+      if (!token) return 0;
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        return 0;
+      }
+
+      const data: CartCountResponse = await response.json().catch(() => ({}));
+      return data?.data?.totalItems ?? 0;
+    },
+    enabled: Boolean(token),
+    staleTime: 30 * 1000,
+    gcTime: 5 * 60 * 1000,
+  });
 
 
   const toggleMenu = () => {
@@ -71,7 +106,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#f8f9fa] border-b border-gray-200 sticky top-0 z-50">
+    <nav className="bg-[#f8f9fa] border-b border-gray-200 sticky top-0 z-50 relative">
       <div className="container mx-auto px-6 lg:px-8">
         <div className="flex justify-between items-center py-2">
           {/* Logo */}
@@ -155,8 +190,16 @@ const Navbar = () => {
             {isLoggedIn ? (
               <>
                 <Link href="/my-cart">
-                  <button className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors">
+                  <button
+                    className="relative w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                    aria-label={`Cart (${cartCount})`}
+                  >
                     <ShoppingCart className="w-5 h-5 text-blue-600" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-600 text-white text-[11px] font-semibold leading-[18px] text-center px-1">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
                   </button>
                 </Link>
                 <DropdownMenu>
@@ -209,8 +252,8 @@ const Navbar = () => {
 
       {/* Mobile Menu */}
       <div
-        className={`lg:hidden bg-white border-t overflow-hidden transition-[max-height,opacity] duration-300 ${
-          isOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0'
+        className={`lg:hidden absolute left-0 right-0 top-full bg-white border-t shadow-sm transition-all duration-300 ${
+          isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
         }`}
       >
         <div className="px-6 py-8 space-y-1">
@@ -277,7 +320,13 @@ const Navbar = () => {
               <>
                 <Link href="/my-cart" className="flex-1">
                   <button className="w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
-                    <ShoppingCart className="w-5 h-5" /> Cart
+                    <ShoppingCart className="w-5 h-5" />
+                    <span>Cart</span>
+                    {cartCount > 0 && (
+                      <span className="min-w-[20px] h-[20px] rounded-full bg-red-600 text-white text-[11px] font-semibold leading-[20px] text-center px-1">
+                        {cartCount > 99 ? '99+' : cartCount}
+                      </span>
+                    )}
                   </button>
                 </Link>
                 <DropdownMenu>

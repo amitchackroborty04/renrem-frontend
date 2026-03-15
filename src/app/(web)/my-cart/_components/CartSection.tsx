@@ -189,6 +189,7 @@ export default function CartSection() {
       setDeleteTarget(null);
       toast.success("Item removed from cart");
       queryClient.invalidateQueries({ queryKey: ["cart"] });
+      queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
     onError: (error: Error) => {
       toast.error("Failed to remove item", {
