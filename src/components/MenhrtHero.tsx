@@ -20,7 +20,7 @@ export default function DynamicHeroSection({
   bgImage,
   title,
   description,
-  minHeightClass = "h-[70vh]",
+  minHeightClass = "h-[35vh] md:h-[70vh]",
   overlayClassName = "bg-[#10101063]",
 }: HeroSectionProps) {
   return (

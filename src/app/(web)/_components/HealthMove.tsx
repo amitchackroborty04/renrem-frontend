@@ -1,3 +1,4 @@
+import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -5,14 +6,12 @@ const treatmentCards = [
   {
     title: "Erectile\nDisfunction",
     badge: "New",
-    image:
-      "/images/health1.jpg",
+    image: "/images/health1.jpg",
   },
   {
     title: "Weight Control",
     badge: null,
-    image:
-      "/images/health2.jpg",
+    image: "/images/health2.jpg",
   },
 ];
 
@@ -47,85 +46,91 @@ const steps = [
 
 export default function HealthMove() {
   return (
-    <div className="min-h-screen font-sans container mx-auto my-[58px]">
-      {/* Heading */}
-      <h1 className="text-[48px] font-extrabold text-blue-600 tracking-tight mb-6 leading-tight">
-        YOUR HEALTH. YOUR MOVE.
-      </h1>
+    <section className="w-full py-10 sm:py-12 lg:py-16">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Heading */}
+        <h1 className="mb-6 text-[28px] font-bold leading-tight tracking-tight text-[#0024DA] sm:mb-8 sm:text-[36px] md:text-[42px] lg:text-[48px]">
+          YOUR HEALTH. YOUR MOVE.
+        </h1>
 
-      {/* Treatment Cards */}
-      <div className="grid grid-cols-2 gap-4 mb-4">
-        {treatmentCards.map((card) => (
-          <div
-            key={card.title}
-            className="relative overflow-hidden h-[350px]"
-          >
-            {/* Background Image */}
-            <Image
-              width={500}
-              height={500}
-              src={card.image}
-              alt={card.title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-            {/* Overlay */}
-            {/* <div className="absolute inset-0 bg-black/20" /> */}
+        {/* Treatment Cards */}
+        <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {treatmentCards.map((card) => (
+            <div
+              key={card.title}
+              className="relative h-[280px] overflow-hidden rounded-2xl sm:h-[320px] lg:h-[350px]"
+            >
+              <Image
+                width={800}
+                height={800}
+                src={card.image}
+                alt={card.title}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
 
-            {/* Content */}
-            <div className="relative z-10 p-6 h-full flex flex-col justify-between">
-              <div>
-                <h2 className="text-white text-2xl font-bold leading-tight whitespace-pre-line drop-shadow">
-                  {card.title}
-                </h2>
-                {card.badge && (
-                  <span className="inline-block mt-3 bg-[#e8f56a] text-black text-xs font-semibold px-4 py-1.5 rounded-full">
-                    {card.badge}
-                  </span>
-                )}
-              </div>
-              <div className="flex justify-end">
-                <button className="bg-black text-white text-sm font-medium px-5 py-2.5 rounded-full flex items-center gap-2 hover:bg-neutral-800 transition-colors">
-                  Start Now →
-                </button>
+              <div className="absolute inset-0 bg-black/20" />
+
+              <div className="relative z-10 flex h-full flex-col justify-between p-4 sm:p-5 lg:p-6">
+                <div>
+                  <h2 className="whitespace-pre-line text-[22px] font-bold leading-tight text-white drop-shadow sm:text-[24px] lg:text-[28px]">
+                    {card.title}
+                  </h2>
+
+                  {card.badge && (
+                    <span className="mt-3 inline-block rounded-full bg-[#e8f56a] px-4 py-1.5 text-xs font-semibold text-black">
+                      {card.badge}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <button className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 sm:px-5 sm:py-2.5 sm:text-base">
+                    Start Now
+                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      {/* Quick Links */}
-      <div className="flex gap-3 mb-4">
-        {quickLinks.map((link) => (
-          <div
-            key={link.label}
-            className="flex-1 bg-[#EEE9E4] px-5 h-[184px] flex items-center justify-between gap-4 shadow-sm"
-          >
-            <span className="text-sm font-medium text-neutral-800 whitespace-pre-line leading-snug">
-              {link.label}
-            </span>
-            <button className="bg-black text-white rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0 hover:bg-neutral-800 transition-colors text-base">
-              →
-            </button>
-          </div>
-        ))}
-      </div>
+        {/* Quick Links */}
+        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {quickLinks.map((link) => (
+            <div
+              key={link.label}
+              className="flex min-h-[140px] items-center justify-between gap-4 rounded-2xl bg-[#EEE9E4] px-4 py-5 shadow-sm sm:min-h-[160px] sm:px-5 lg:h-[184px]"
+            >
+              <span className="whitespace-pre-line text-lg font-medium leading-snug text-[#131313] sm:text-xl lg:text-2xl">
+                {link.label}
+              </span>
 
-      {/* Steps */}
-      <div className="flex gap-3">
-  {steps.map((step) => (
-    <div
-      key={step.num}
-      className="flex-1 bg-[#E3E3E6] px-5 h-[194px] flex flex-col items-center justify-center text-center"
-    >
-      <p className="text-sm font-semibold text-neutral-700 mb-2">
-        {step.num} {step.title}
-      </p>
-      <p className="text-sm text-neutral-500 leading-relaxed">
-        {step.desc}
-      </p>
-    </div>
-  ))}
-</div>
-    </div>
+              <button className="flex h-10 w-10 px-8 flex-shrink-0 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-neutral-800">
+                <span>
+                <ArrowRight className="h-4 w-4" />
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Steps */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          {steps.map((step) => (
+            <div
+              key={step.num}
+              className="flex min-h-[170px] flex-col justify-center rounded-2xl bg-[#E3E3E6] px-4 py-5 sm:px-5 lg:h-[194px]"
+            >
+              <p className="mb-2 text-lg font-semibold text-[#131313] sm:text-xl">
+                {step.num} {step.title}
+              </p>
+              <p className="text-base leading-relaxed text-[#131313] sm:text-lg lg:text-xl">
+                {step.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

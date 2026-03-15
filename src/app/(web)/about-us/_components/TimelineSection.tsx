@@ -17,7 +17,7 @@ const timelineData = [
     title: "Rapid Growth",
     description:
       "By 2021, our vision began turning into real impact. The platform expanded into 15 countries, enabling thousands of patients to easily find trusted hospitals, clinics, and doctors. This period marked a major leap in reach, partnerships, and user trust as more people embraced digital healthcare solutions.",
-     image: "/about.png",
+     image: "/about2.png",
     imageAlt: "Medical team standing together",
     imageLeft: false,
   },
@@ -27,7 +27,7 @@ const timelineData = [
     title: "Recognition",
     description:
       "In 2024, our efforts were acknowledged on a continental stage when we were awarded the Best Digital Health Platform in Africa. This recognition celebrated our commitment to improving healthcare access, strengthening patient experience, and driving innovation across the African healthcare landscape.",
-     image: "/about.png",
+     image: "/about3.png",
     imageAlt: "Award trophy on table",
     imageLeft: true,
   },
