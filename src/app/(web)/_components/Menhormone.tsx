@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const Menhormone = () => {
@@ -41,10 +42,11 @@ const Menhormone = () => {
             >
               {"Men Hormone Replacement"}
             </h2>
-
+            <Link href={'/product-categorys/Men%20HRT'}>
             <button className="absolute bottom-7 right-7 bg-black/80 backdrop-blur-sm text-white text-sm rounded-full px-6 py-3">
               Learn More
             </button>
+            </Link>
           </div>
 
           {/* Women Card */}
@@ -64,10 +66,11 @@ const Menhormone = () => {
             >
               {"Woman Hormone Replacement"}
             </h2>
-
+            <Link href={'/product-categorys/Women%20HRT'}>
             <button className="absolute bottom-7 right-7 bg-black/80 backdrop-blur-sm text-white text-sm rounded-full px-6 py-3">
               Start Now
             </button>
+            </Link>
           </div>
         </div>
       </div>

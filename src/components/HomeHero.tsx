@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 function HomeHero() {
@@ -29,9 +30,11 @@ function HomeHero() {
         </p>
 
         {/* Button */}
+        <Link href="/product-categorys/Weight%20Loss">
         <button className="px-6 sm:px-8 py-2 sm:py-3 text-sm sm:text-base lg:text-[20px] font-medium rounded-full bg-[#7DBAED] border-white/40 text-black backdrop-blur-sm hover:bg-[#7DBAED]/90 transition-all duration-200 w-fit">
           Start now
         </button>
+        </Link>
 
       </div>
     </section>
