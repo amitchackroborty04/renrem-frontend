@@ -1,61 +1,66 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 
-export default function UnlockSection() {
-  const [email, setEmail] = useState("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: handle email submission
-  };
-
+export default function UnlockGuideSection() {
   return (
-    <section className="relative px-8 py-14 sm:px-16 mt-[80px] mb-10 overflow-hidden">
-      {/* Background Image */}
-      <Image
-        src="/images/unlockImage.png"
-        alt="background"
-        fill
-        className="object-cover object-center"
-        priority
-      />
+    <section className="w-full px-4 py-8 sm:px-6 sm:py-0 lg:px-0 lg:py-12">
+      <div className="relative mx-auto overflow-hidden rounded-[0px] bg-[#90693D] min-h-[420px] sm:min-h-[500px] lg:min-h-[550px]">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('/images/bgimage.jpg')",
+          }}
+        />
+        <div className="absolute inset-0 z-10 bg-[#90693D]/80"></div>
 
-      {/* Dark overlay — optional, image এর উপর content readable রাখতে */}
-      {/* <div className="absolute inset-0 bg-black/10" /> */}
+        <div className="relative z-20 container mx-auto grid min-h-[420px] grid-cols-1 items-center lg:min-h-[550px] lg:grid-cols-2">
+          {/* Left Content */}
+          <div className="flex h-full items-center px-6 py-10 sm:px-10 sm:py-12 lg:px-14 lg:py-14">
+            <div className="w-full max-w-[430px]">
+              <h2 className="text-[34px] font-semibold leading-[120%] tracking-[-0.05em] text-white sm:text-[44px] lg:text-[56px]">
+                Unlock the free guide to protein for weight loss
+              </h2>
 
-      {/* Content — left side */}
-      <div className="flex justify-center mr-[34%]">
-        <div className="relative z-10 max-w-xl ">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white leading-snug mb-3">
-            Unlock the free guide to protein for weight loss
-          </h2>
-          <p className="text-sm text-white/90 mb-6">
-            Written By Board-Certified Doctors To Support Your Journey.
-          </p>
+              <p className="mt-4 max-w-[320px] text-sm leading-6 text-white/95 sm:text-base">
+                Written By Board-Certified Doctors To Support Your Journey.
+              </p>
 
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              required
-              className="w-full bg-white rounded-xl px-5 h-[52px] text-sm text-gray-700 outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-white/50 transition"
-            />
-            <button
-              type="submit"
-              className="w-full bg-[#111111] hover:bg-black text-white text-base font-medium h-[52px] rounded-full transition"
-            >
-              Get the guide
-            </button>
-          </form>
+              <form className="mt-6 sm:mt-8">
+                <input
+                  type="email"
+                  placeholder="Email"
+                  className="h-[54px] w-full rounded-[8px] border-0 bg-white px-5 text-base text-black outline-none placeholder:text-[#8b8b8b]"
+                />
 
-          <p className="mt-4 text-xs text-white/70 leading-relaxed max-w-xs">
-            by creating an account using email, I agree to the Terms &
-            condition, and acknowledge the Privacy Policy.
-          </p>
+                <button
+                  type="submit"
+                  className="mt-4 h-[58px] w-full rounded-full bg-[#07090f] text-[18px] font-medium text-white transition hover:opacity-90"
+                >
+                  Get the guide
+                </button>
+              </form>
+
+              <p className="mt-5 max-w-[360px] text-[11px] leading-4 text-white/90 sm:text-xs">
+                by creating an account using email, I agree to the Terms &
+                condition, and acknowledge the Privacy Policy.
+              </p>
+            </div>
+          </div>
+
+          {/* Right Image */}
+          <div className="relative flex h-full items-end justify-center lg:justify-end">
+            <div className="relative h-[260px] w-[240px] sm:h-[340px] sm:w-[300px] md:h-[400px] md:w-[350px] lg:absolute lg:bottom-0 lg:right-[8%] lg:h-[5500px] lg:w-[550px]">
+              <Image
+                src="/images/man.png"
+                alt="Guide model"
+                width={1000}
+                height={1000}
+                className="object-contain object-bottom h-full w-full"
+              />
+            </div>
+          </div>
         </div>
       </div>
     </section>

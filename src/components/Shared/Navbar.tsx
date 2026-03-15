@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -7,6 +8,7 @@ import { Menu, X, ChevronDown, ShoppingCart, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import { signOut, useSession } from 'next-auth/react';
 import { useQuery } from '@tanstack/react-query';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,13 +27,12 @@ type CartCountResponse = {
 
 const Navbar = () => {
   const pathname = usePathname();
-
-  // Decode encoded URI (e.g. %20 → space) so dynamic links match correctly
   const decodedPathname = decodeURIComponent(pathname);
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const [isLogoutConfirmOpen, setIsLogoutConfirmOpen] = useState(false);
+
   const session = useSession();
   const isLoggedIn = session.status === 'authenticated';
   const token = session.data?.user?.accessToken;
@@ -40,18 +41,20 @@ const Navbar = () => {
     queryKey: ['cart-count'],
     queryFn: async () => {
       if (!token) return 0;
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        cache: 'no-store',
-      });
 
-      if (!response.ok) {
-        return 0;
-      }
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          cache: 'no-store',
+        }
+      );
+
+      if (!response.ok) return 0;
 
       const data: CartCountResponse = await response.json().catch(() => ({}));
       return data?.data?.totalItems ?? 0;
@@ -61,13 +64,12 @@ const Navbar = () => {
     gcTime: 5 * 60 * 1000,
   });
 
-
-  const toggleMenu = () => {
-    setIsOpen((v) => {
-      const next = !v;
-      if (!next) setIsMoreOpen(false);
-      return next;
-    });
+  const handleSheetOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      setIsMoreOpen(false);
+      setIsLogoutConfirmOpen(false);
+    }
   };
 
   const closeAll = () => {
@@ -106,9 +108,9 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-[#f8f9fa] border-b border-gray-200 sticky top-0 z-50 relative">
-      <div className="container mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center py-2">
+    <nav className="sticky top-0 z-50 border-b border-gray-200 bg-[#f8f9fa]">
+      <div className="container mx-auto px-4 lg:px-8">
+        <div className="flex items-center justify-between py-2">
           {/* Logo */}
           <Link href="/" className="shrink-0" aria-label="Go to homepage" onClick={closeAll}>
             <Image
@@ -116,22 +118,23 @@ const Navbar = () => {
               alt="Renrem Logo"
               width={1000}
               height={1000}
-              className="object-cover w-[100px] h-[80px]"
+              className="h-[72px] w-[95px] object-cover sm:h-[80px] sm:w-[100px]"
               priority
             />
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-8 text-base text-[#131313] font-medium">
+          <div className="hidden items-center gap-8 text-base font-medium text-[#131313] lg:flex">
             {mainLinks.map((link) => {
               const active = isActiveLink(link.href);
+
               return (
                 <Link
                   key={link.name}
                   href={link.href}
                   className={`pb-1 transition-colors duration-200 ${
                     active
-                      ? 'text-blue-600 border-b-2 border-blue-600'
+                      ? 'border-b-2 border-blue-600 text-blue-600'
                       : 'text-gray-700 hover:text-blue-600'
                   }`}
                 >
@@ -140,39 +143,40 @@ const Navbar = () => {
               );
             })}
 
-            {/* More Dropdown - Desktop */}
+            {/* Desktop More Dropdown */}
             <div
-              className="relative group"
+              className="group relative"
               onMouseEnter={() => setIsMoreOpen(true)}
               onMouseLeave={() => setIsMoreOpen(false)}
             >
               <button
                 type="button"
-                className="flex items-center gap-1 font-medium text-[16px] text-[#131313] hover:text-blue-600 transition-colors duration-200"
-                onClick={() => setIsMoreOpen((v) => !v)}
+                className="flex items-center gap-1 text-[16px] font-medium text-[#131313] transition-colors duration-200 hover:text-blue-600"
+                onClick={() => setIsMoreOpen((prev) => !prev)}
                 aria-haspopup="menu"
                 aria-expanded={isMoreOpen}
               >
                 More
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`}
                 />
               </button>
 
               <div
-                className={`absolute right-0 mt-3 w-52 bg-white rounded-2xl shadow-2xl border border-gray-100 py-3
-                opacity-0 invisible group-hover:opacity-100 group-hover:visible
-                transition-all duration-200 z-50`}
+                className={`invisible absolute right-0 z-50 mt-3 w-52 rounded-2xl border border-gray-100 bg-white py-3 shadow-2xl opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100`}
                 role="menu"
               >
                 {moreLinks.map((link) => {
                   const active = isActiveLink(link.href);
+
                   return (
                     <Link
                       key={link.name}
                       href={link.href}
-                      className={`block px-6 py-3 transition-colors text-base text-[#131313] ${
-                        active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                      className={`block px-6 py-3 text-base transition-colors ${
+                        active
+                          ? 'bg-blue-50 text-blue-600'
+                          : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                       }`}
                       onClick={() => setIsMoreOpen(false)}
                       role="menuitem"
@@ -185,33 +189,35 @@ const Navbar = () => {
             </div>
           </div>
 
-          {/* Right Side Icons */}
-          <div className="hidden lg:flex items-center gap-3">
+          {/* Desktop Right Side */}
+          <div className="hidden items-center gap-3 lg:flex">
             {isLoggedIn ? (
               <>
                 <Link href="/my-cart">
                   <button
-                    className="relative w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                    className="relative flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 transition-colors hover:bg-blue-200"
                     aria-label={`Cart (${cartCount})`}
                   >
-                    <ShoppingCart className="w-5 h-5 text-blue-600" />
+                    <ShoppingCart className="h-5 w-5 text-blue-600" />
                     {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-red-600 text-white text-[11px] font-semibold leading-[18px] text-center px-1">
+                      <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-red-600 px-1 text-center text-[11px] font-semibold leading-[18px] text-white">
                         {cartCount > 99 ? '99+' : cartCount}
                       </span>
                     )}
                   </button>
                 </Link>
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button
                       type="button"
-                      className="w-10 h-10 bg-blue-100 hover:bg-blue-200 rounded-full flex items-center justify-center transition-colors"
+                      className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 transition-colors hover:bg-blue-200"
                       aria-label="Account menu"
                     >
-                      <User className="w-5 h-5 text-blue-600" />
+                      <User className="h-5 w-5 text-blue-600" />
                     </button>
                   </DropdownMenuTrigger>
+
                   <DropdownMenuContent align="end" className="w-48">
                     <DropdownMenuItem asChild>
                       <Link href="/profile/edit-profile">Profile</Link>
@@ -231,148 +237,159 @@ const Navbar = () => {
               </>
             ) : (
               <Link href="/signin">
-                <button className="px-5 h-10 bg-[#0024DA] hover:bg-blue-700 text-white rounded-full font-medium transition-colors">
+                <button className="h-10 rounded-full bg-[#0024DA] px-5 font-medium text-white transition-colors hover:bg-blue-700">
                   Login
                 </button>
               </Link>
             )}
           </div>
 
-          {/* Mobile Hamburger */}
-          <button
-            onClick={toggleMenu}
-            className="lg:hidden p-3 text-gray-700"
-            aria-label="Toggle menu"
-            aria-expanded={isOpen}
-          >
-            {isOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
-        </div>
-      </div>
+          {/* Mobile Right Side Sheet */}
+          <div className="lg:hidden">
+            <Sheet open={isOpen} onOpenChange={handleSheetOpenChange}>
+              <SheetTrigger asChild>
+                <button
+                  className="rounded-xl p-2 text-gray-700 transition hover:bg-gray-100"
+                  aria-label="Toggle menu"
+                  aria-expanded={isOpen}
+                >
+                  {isOpen ? <X size={28} /> : <Menu size={28} />}
+                </button>
+              </SheetTrigger>
 
-      {/* Mobile Menu */}
-      <div
-        className={`lg:hidden absolute left-0 right-0 top-full bg-white border-t shadow-sm transition-all duration-300 ${
-          isOpen ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'
-        }`}
-      >
-        <div className="px-6 py-8 space-y-1">
-          {mainLinks.map((link) => {
-            const active = isActiveLink(link.href);
-            return (
-              <Link
-                key={link.name}
-                href={link.href}
-                className={`block px-5 py-4 text-lg font-medium rounded-2xl transition-colors ${
-                  active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
-                }`}
-                onClick={closeAll}
+              <SheetContent
+                side="right"
               >
-                {link.name}
-              </Link>
-            );
-          })}
+                <SheetHeader className="border-b border-gray-100 px-6 py-5 text-left">
+                  <SheetTitle className="text-left text-lg font-semibold text-[#131313]">
+                    Menu
+                  </SheetTitle>
+                </SheetHeader>
 
-          {/* Mobile "More" Accordion */}
-          <div className="pt-6 border-t mt-6">
-            <button
-              type="button"
-              className="w-full flex items-center justify-between px-5 py-4 rounded-2xl hover:bg-gray-50 transition-colors"
-              onClick={() => setIsMoreOpen((v) => !v)}
-              aria-expanded={isMoreOpen}
-              aria-controls="mobile-more"
-            >
-              <span className="text-xs font-semibold tracking-widest text-gray-500">MORE</span>
-              <ChevronDown
-                className={`w-5 h-5 text-gray-500 transition-transform ${isMoreOpen ? 'rotate-180' : ''}`}
-              />
-            </button>
+                <div className="flex h-full flex-col overflow-y-auto px-4 pb-6 pt-4">
+                  {/* Main Links */}
+                  <div className="space-y-2">
+                    {mainLinks.map((link) => {
+                      const active = isActiveLink(link.href);
 
-            <div
-              id="mobile-more"
-              className={`grid transition-[grid-template-rows,opacity] duration-300 ${
-                isMoreOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-              }`}
-            >
-              <div className="overflow-hidden">
-                {moreLinks.map((link) => {
-                  const active = isActiveLink(link.href);
-                  return (
-                    <Link
-                      key={link.name}
-                      href={link.href}
-                      className={`block px-5 py-4 text-lg font-medium rounded-2xl transition-colors ${
-                        active ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50'
-                      }`}
-                      onClick={closeAll}
-                    >
-                      {link.name}
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
+                      return (
+                        <Link
+                          key={link.name}
+                          href={link.href}
+                          onClick={closeAll}
+                          className={`block rounded-2xl px-4 py-3 text-base font-medium transition-colors ${
+                            active
+                              ? 'bg-blue-50 text-blue-600'
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {link.name}
+                        </Link>
+                      );
+                    })}
+                  </div>
 
-          {/* Mobile Icons */}
-          <div className="flex gap-4 pt-8">
-            {isLoggedIn ? (
-              <>
-                <Link href="/my-cart" className="flex-1">
-                  <button className="w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors">
-                    <ShoppingCart className="w-5 h-5" />
-                    <span>Cart</span>
-                    {cartCount > 0 && (
-                      <span className="min-w-[20px] h-[20px] rounded-full bg-red-600 text-white text-[11px] font-semibold leading-[20px] text-center px-1">
-                        {cartCount > 99 ? '99+' : cartCount}
-                      </span>
-                    )}
-                  </button>
-                </Link>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  {/* More Accordion */}
+                  <div className="mt-5 border-t border-gray-100 pt-5">
                     <button
                       type="button"
-                      className="flex-1 w-full flex items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 text-blue-600 py-4 rounded-2xl font-medium transition-colors"
-                      aria-label="Account menu"
+                      className="flex w-full items-center justify-between rounded-2xl px-4 py-3 transition-colors hover:bg-gray-50"
+                      onClick={() => setIsMoreOpen((prev) => !prev)}
+                      aria-expanded={isMoreOpen}
+                      aria-controls="mobile-more-menu"
                     >
-                      <User className="w-5 h-5" /> Account
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
-                    <DropdownMenuItem asChild>
-                      <Link href="/profile/edit-profile" onClick={() => setIsOpen(false)}>
-                        Profile
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onSelect={() => {
-                        setIsOpen(false);
-                        handleRequestLogout();
-                      }}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <span className="inline-flex items-center gap-2">
-                        <LogOut className="h-4 w-4" />
-                        Logout
+                      <span className="text-sm font-semibold tracking-wide text-gray-500">
+                        More
                       </span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <Link href="/signin" className="flex-1">
-                <button className="w-full flex items-center justify-center bg-[#0024DA] hover:bg-blue-700 text-white py-4 rounded-2xl font-medium transition-colors">
-                  Login
-                </button>
-              </Link>
-            )}
+                      <ChevronDown
+                        className={`h-5 w-5 text-gray-500 transition-transform ${
+                          isMoreOpen ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    <div
+                      id="mobile-more-menu"
+                      className={`grid transition-all duration-300 ${
+                        isMoreOpen ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="mt-2 space-y-2">
+                          {moreLinks.map((link) => {
+                            const active = isActiveLink(link.href);
+
+                            return (
+                              <Link
+                                key={link.name}
+                                href={link.href}
+                                onClick={closeAll}
+                                className={`block rounded-2xl px-4 py-3 text-base font-medium transition-colors ${
+                                  active
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'text-gray-700 hover:bg-gray-50'
+                                }`}
+                              >
+                                {link.name}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom Buttons */}
+                  <div className="mt-auto pt-6">
+                    {isLoggedIn ? (
+                      <div className="space-y-3">
+                        <Link href="/my-cart" onClick={closeAll} className="block">
+                          <button className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-50 py-3 font-medium text-blue-600 transition-colors hover:bg-blue-100">
+                            <ShoppingCart className="h-5 w-5" />
+                            <span>Cart</span>
+                            {cartCount > 0 && (
+                              <span className="min-w-[20px] rounded-full bg-red-600 px-1 text-center text-[11px] font-semibold leading-5 text-white">
+                                {cartCount > 99 ? '99+' : cartCount}
+                              </span>
+                            )}
+                          </button>
+                        </Link>
+
+                        <Link href="/profile/edit-profile" onClick={closeAll} className="block">
+                          <button className="flex w-full items-center justify-center gap-3 rounded-2xl bg-blue-50 py-3 font-medium text-blue-600 transition-colors hover:bg-blue-100">
+                            <User className="h-5 w-5" />
+                            Profile
+                          </button>
+                        </Link>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            closeAll();
+                            handleRequestLogout();
+                          }}
+                          className="flex w-full items-center justify-center gap-3 rounded-2xl bg-red-600 py-3 font-medium text-white transition-colors hover:bg-red-700"
+                        >
+                          <LogOut className="h-5 w-5" />
+                          Logout
+                        </button>
+                      </div>
+                    ) : (
+                      <Link href="/signin" onClick={closeAll} className="block">
+                        <button className="w-full rounded-2xl bg-[#0024DA] py-3 font-medium text-white transition-colors hover:bg-blue-700">
+                          Login
+                        </button>
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </div>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Confirm Modal */}
       {isLogoutConfirmOpen && (
         <div
           className="fixed inset-0 z-[70] flex items-center justify-center bg-black/50 px-4"
@@ -391,6 +408,7 @@ const Navbar = () => {
                   Are you sure you want to log out?
                 </p>
               </div>
+
               <button
                 type="button"
                 onClick={() => setIsLogoutConfirmOpen(false)}
@@ -409,6 +427,7 @@ const Navbar = () => {
               >
                 Cancel
               </button>
+
               <button
                 type="button"
                 onClick={handleConfirmLogout}

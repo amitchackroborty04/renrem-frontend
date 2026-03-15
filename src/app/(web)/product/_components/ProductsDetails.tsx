@@ -147,19 +147,19 @@ function ProductsDetails() {
   });
 
   return (
-    <div className="w-[80%] mx-auto">
+    <div className="w-full max-w-6xl mx-auto">
       {/* Main Content */}
-      <div className="px-5 py-5">
+      <div className="px-4 sm:px-5 py-5">
         {/* Product Top Section */}
-        <div className="p-4 mb-5">
-          <div className="flex gap-4">
+        <div className="p-3 sm:p-4 mb-5">
+          <div className="flex flex-col lg:flex-row gap-4">
             {/* Thumbnail Column */}
-            <div className="flex flex-col gap-2">
+            <div className="order-2 lg:order-1 flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
               {singleProductData?.image?.map((img: string, i: number) => (
                 <button
                   key={i}
                   onClick={() => setActiveIndex(i)}
-                  className={`w-[120px] h-[58px] rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
+                  className={`w-[80px] h-[48px] sm:w-[100px] sm:h-[54px] lg:w-[120px] lg:h-[58px] rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
                     activeIndex === i
                       ? "border-blue-500"
                       : "border-gray-200 opacity-70 hover:opacity-100"
@@ -177,10 +177,7 @@ function ProductsDetails() {
             </div>
 
             {/* Main Image with arrows */}
-            <div
-              className="relative flex-shrink-0 rounded-xl overflow-hidden"
-              style={{ width: "450px", height: "450px" }}
-            >
+            <div className="order-1 lg:order-2 relative w-full max-w-[450px] aspect-square flex-shrink-0 rounded-xl overflow-hidden mx-auto lg:mx-0">
               <Image
                 width={300}
                 height={300}
@@ -206,22 +203,22 @@ function ProductsDetails() {
             </div>
 
             {/* Product Info */}
-            <div className="flex-1 min-w-0">
-              <h2 className="lg:text-[40px] md:text-[35px] text-[30px] font-bold text-[#212121] mb-2">
+            <div className="order-3 flex-1 min-w-0 lg:mt-0">
+              <h2 className="text-[24px] sm:text-[28px] md:text-[35px] lg:text-[40px] font-bold text-[#212121] mb-2">
                 {singleProductData?.name}
               </h2>
-              <p className="text-[20px] text-[#4E4E4E] leading-[150%] mb-3">
+              <p className="text-[14px] sm:text-[16px] lg:text-[20px] text-[#4E4E4E] leading-[150%] mb-3">
                 {singleProductData?.description}
               </p>
-              <p className="text-[20px] text-black mb-[20px] font-normal">
+              <p className="text-[14px] sm:text-[16px] lg:text-[20px] text-black mb-[20px] font-normal">
                 {singleProductData?.category || "Men HRT"}
               </p>
 
               {/* ── Size Selector ── */}
-              <div className="flex items-center gap-3 mb-5">
-                <span className="text-[20px] text-black font-normal">Size:</span>
+              <div className="flex flex-wrap items-center gap-3 mb-5">
+                <span className="text-[14px] sm:text-[16px] lg:text-[20px] text-black font-normal">Size:</span>
                 <Select value={selectedSize} onValueChange={setSelectedSize}>
-                  <SelectTrigger className="w-[140px] text-[16px] text-gray-700 border-gray-300">
+                  <SelectTrigger className="w-[140px] text-[14px] sm:text-[16px] text-gray-700 border-gray-300">
                     <SelectValue placeholder="Select size" />
                   </SelectTrigger>
                   <SelectContent>
@@ -234,19 +231,19 @@ function ProductsDetails() {
                 </Select>
               </div>
 
-              <p className="lg:text-[40px] md:text-[35px] text-[30px] font-bold text-gray-900 mb-6">
+              <p className="text-[26px] sm:text-[30px] md:text-[35px] lg:text-[40px] font-bold text-gray-900 mb-6">
                 ${singleProductData?.price}
               </p>
 
               {/* ── Buy now & Add to Cart Buttons ── */}
-              <div className="flex items-center gap-3 w-full">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
                 <button
                   onClick={handleBuyNow}
-                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[18px] font-semibold rounded-lg transition-colors"
+                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[16px] sm:text-[18px] font-semibold rounded-lg transition-colors"
                 >
                   Buy now
                 </button>
-                <button   onClick={() => addToCartMutation.mutate()} className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors">
+                <button onClick={() => addToCartMutation.mutate()} className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[16px] sm:text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors">
                   Add to Cart
                 </button>
               </div>
@@ -256,10 +253,10 @@ function ProductsDetails() {
 
         {/* What will you get */}
         <div className="" style={{ borderColor: "#93c5fd" }}>
-          <h3 className="lg:text-[40px] md:text-[35px] text-[30px] font-bold text-[#212121] mb-2">
+          <h3 className="text-[24px] sm:text-[28px] md:text-[35px] lg:text-[40px] font-bold text-[#212121] mb-2">
             What will you get?
           </h3>
-          <p className="text-[20px] text-[#4E4E4E] leading-[150%] mb-3">
+          <p className="text-[14px] sm:text-[16px] lg:text-[20px] text-[#4E4E4E] leading-[150%] mb-3">
             {singleProductData?.whatWillYouGet}
           </p>
         </div>
@@ -269,3 +266,4 @@ function ProductsDetails() {
 }
 
 export default ProductsDetails;
+
