@@ -1,27 +1,54 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 
-const cartItems = [
-  {
-    id: 1,
-    title: "Lorem ipsum dolor sit amet, consectetur efficitur.",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt porta laoreet. Praesent a leo et leo ornare mollis quis erat. Integer aliquam dapibus justo at dapibus.",
-    price: 54,
-    image: "/checkout-product.png",
-  },
-  {
-    id: 2,
-    title: "Lorem ipsum dolor sit amet, consectetur efficitur.",
-    description:
-      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut tincidunt porta laoreet. Praesent a leo et leo ornare mollis quis erat. Integer aliquam dapibus justo at dapibus.",
-    price: 54,
-    image: "/checkout-product.png",
-  },
-];
+type CheckoutItem = {
+  id: string;
+  productId: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  image: string;
+};
+
+type CheckoutCart = {
+  items: CheckoutItem[];
+  subtotal: number;
+  total: number;
+  totalItems: number;
+  savedAt: string;
+};
 
 export default function CheckoutSection() {
+  const [checkoutCart, setCheckoutCart] = useState<CheckoutCart | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem("checkoutCart");
+    if (!stored) return;
+    try {
+      const parsed: CheckoutCart = JSON.parse(stored);
+      setCheckoutCart(parsed);
+    } catch {
+      // Ignore invalid storage data
+    }
+  }, []);
+
+  const items = checkoutCart?.items ?? [];
+
+  const computedSubtotal = useMemo(
+    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
+    [items]
+  );
+
+  const subtotal = checkoutCart?.subtotal ?? computedSubtotal;
+  const totalItems =
+    checkoutCart?.totalItems ??
+    items.reduce((sum, item) => sum + item.quantity, 0);
+  const total = checkoutCart?.total ?? subtotal;
+
   return (
     <section className="w-full py-10 sm:py-12 lg:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,48 +84,61 @@ export default function CheckoutSection() {
             </h2>
 
             <div className="mt-5 space-y-4">
-              {cartItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-[12px] bg-[#F4F6FF] p-3 sm:p-4"
-                >
-                  <div className="flex flex-col gap-4 sm:flex-row">
-                    <div className="relative h-[120px] w-full overflow-hidden rounded-[8px] sm:h-[102px] sm:w-[120px] shrink-0">
-                      <Image
-                        src={item.image}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
+              {items.length > 0 ? (
+                items.map((item) => (
+                  <div
+                    key={item.id}
+                    className="rounded-[12px] bg-[#F4F6FF] p-3 sm:p-4"
+                  >
+                    <div className="flex flex-col gap-4 sm:flex-row">
+                      <div className="relative h-[120px] w-full overflow-hidden rounded-[8px] sm:h-[102px] sm:w-[120px] shrink-0">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
 
-                    <div className="flex-1">
-                      <h3 className="text-[18px] font-semibold leading-tight text-[#252525] sm:text-[20px]">
-                        {item.title}
-                      </h3>
-                      <p className="mt-2 text-[13px] leading-5 text-[#5a5a5a] sm:text-[14px]">
-                        {item.description}
-                      </p>
-                      <p className="mt-3 text-[18px] font-semibold text-[#2a2a2a] sm:text-[20px]">
-                        ${item.price}
-                      </p>
+                      <div className="flex-1">
+                        <h3 className="text-[18px] font-semibold leading-tight text-[#252525] sm:text-[20px]">
+                          {item.name}
+                        </h3>
+                        <p className="mt-2 text-[13px] leading-5 text-[#5a5a5a] sm:text-[14px]">
+                          {item.description}
+                        </p>
+                        <p className="mt-2 text-[13px] text-[#5a5a5a] sm:text-[14px]">
+                          Qty: {item.quantity}
+                        </p>
+                        <p className="mt-3 text-[18px] font-semibold text-[#2a2a2a] sm:text-[20px]">
+                          ${item.price.toFixed(2)}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                ))
+              ) : (
+                <div
+                  className="rounded-[12px] bg-[#F4F6FF] p-4 text-center text-[#5a5a5a]"
+                >
+                  Your cart is empty.
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="mt-5 space-y-3 text-[18px] text-[#2a2a2a] sm:text-[20px]">
-              <SummaryRow label="Subtotal" value="$108.00" />
-              <SummaryRow label="Sales Tax" value="$20.00" />
-              <SummaryRow label="Total Item" value="02" />
+              <SummaryRow label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+              <SummaryRow
+                label="Total Item"
+                value={String(totalItems).padStart(2, "0")}
+              />
             </div>
 
             <div className="my-5 h-px w-full bg-[#c7cdf7]" />
 
             <div className="flex items-center justify-between text-[22px] font-medium text-[#2a2a2a]">
               <span>Total</span>
-              <span>$128.00</span>
+              <span>${total.toFixed(2)}</span>
             </div>
 
             <div className="mt-4 rounded-[8px] border border-[#7f7f8f] bg-transparent px-4 py-3">

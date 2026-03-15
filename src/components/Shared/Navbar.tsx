@@ -188,7 +188,7 @@ const Navbar = () => {
               </>
             ) : (
               <Link href="/signin">
-                <button className="px-5 h-10 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-medium transition-colors">
+                <button className="px-5 h-10 bg-[#0024DA] hover:bg-blue-700 text-white rounded-full font-medium transition-colors">
                   Login
                 </button>
               </Link>
@@ -314,7 +314,7 @@ const Navbar = () => {
               </>
             ) : (
               <Link href="/signin" className="flex-1">
-                <button className="w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-medium transition-colors">
+                <button className="w-full flex items-center justify-center bg-[#0024DA] hover:bg-blue-700 text-white py-4 rounded-2xl font-medium transition-colors">
                   Login
                 </button>
               </Link>
