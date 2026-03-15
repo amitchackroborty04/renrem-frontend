@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   Select,
   SelectContent,
@@ -12,11 +12,67 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 // import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+
+// ─── Cart Types ───────────────────────────────────────────────────────────────
+interface CartItem {
+  id: string;
+  productId: string;
+  name: string;
+  price: number;
+  image: string;
+  size: string;
+  quantity: number;
+}
+
+interface Cart {
+  items: CartItem[];
+  subtotal: number;
+  total: number;
+  totalItems: number;
+  savedAt: string;
+}
+
+// ─── Helper: Save to localStorage ────────────────────────────────────────────
+function saveToCart(newItem: CartItem) {
+  const existing = localStorage.getItem("cart");
+  const cart: Cart = existing
+    ? JSON.parse(existing)
+    : { items: [], subtotal: 0, total: 0, totalItems: 0, savedAt: "" };
+
+  // Check if item with same productId + size already exists
+  const existingIndex = cart.items.findIndex(
+    (i) => i.productId === newItem.productId && i.size === newItem.size
+  );
+
+  if (existingIndex !== -1) {
+    cart.items[existingIndex].quantity += 1;
+  } else {
+    cart.items.push(newItem);
+  }
+
+  const subtotal = cart.items.reduce(
+    (sum, i) => sum + i.price * i.quantity,
+    0
+  );
+
+  cart.subtotal = parseFloat(subtotal.toFixed(2));
+  cart.total = parseFloat(subtotal.toFixed(2));
+  cart.totalItems = cart.items.reduce((sum, i) => sum + i.quantity, 0);
+  cart.savedAt = new Date().toISOString();
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
 
 function ProductsDetails() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState("");
+
+  const router = useRouter();
+  const params = useParams();
+  const productId = params.id;
 
   const handlePrev = () => {
     setActiveIndex((prev) =>
@@ -29,12 +85,6 @@ function ProductsDetails() {
       prev === (singleProductData?.image?.length || 1) - 1 ? 0 : prev + 1
     );
   };
-
-  const params = useParams();
-  const productId = params.id;
-
-  // const session = useSession();
-  // const TOKEN = session?.data?.user?.accessToken;
 
   // ─── Fetch Single Product ─────────────────────────────────────────────
   const { data: singleProductData } = useQuery({
@@ -54,10 +104,57 @@ function ProductsDetails() {
     if (singleProductData?.size?.length && !selectedSize) {
       setSelectedSize(singleProductData.size[0]);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [singleProductData]);
 
-  return ( 
+  // ─── Buy Now Handler ──────────────────────────────────────────────────
+  const handleBuyNow = () => {
+    if (!singleProductData) return;
+
+    const cartItem: CartItem = {
+      id: crypto.randomUUID(),           // unique cart entry id
+      productId: singleProductData._id,
+      name: singleProductData.name,
+      price: singleProductData.price,
+      image: singleProductData.image?.[0] || "",
+      size: selectedSize,
+      quantity: 1,
+    };
+
+    saveToCart(cartItem);
+    router.push("/checkout");
+  };
+
+  const session = useSession();
+  const TOKEN = session?.data?.user?.accessToken; 
+
+
+ const addToCartMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({
+          productId: singleProductData?._id,
+          quantity: 1,
+        }),
+      });
+      if (!res.ok) throw new Error("Failed to add to cart");
+      return res.json();
+    },
+    onSuccess : () => {
+      toast.success('Add to cart Successfully!')
+    },
+
+    onError : (err) => {
+      toast.error(err?.message);
+    } 
+  });
+
+  return (
     <div className="w-[80%] mx-auto">
       {/* Main Content */}
       <div className="px-5 py-5">
@@ -95,7 +192,10 @@ function ProductsDetails() {
               <Image
                 width={300}
                 height={300}
-                src={singleProductData?.image?.[activeIndex] || "/images/carusal1.png"}
+                src={
+                  singleProductData?.image?.[activeIndex] ||
+                  "/images/carusal1.png"
+                }
                 alt="product"
                 className="w-full h-full object-cover"
               />
@@ -148,10 +248,13 @@ function ProductsDetails() {
 
               {/* ── Buy now & Add to Cart Buttons ── */}
               <div className="flex items-center gap-3 w-full">
-                <button className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[18px] font-semibold rounded-lg transition-colors">
+                <button
+                  onClick={handleBuyNow}
+                  className="flex-1 py-2 bg-blue-600 hover:bg-blue-700 text-white text-[18px] font-semibold rounded-lg transition-colors"
+                >
                   Buy now
                 </button>
-                <button className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors">
+                <button   onClick={() => addToCartMutation.mutate()} className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors">
                   Add to Cart
                 </button>
               </div>
@@ -162,7 +265,7 @@ function ProductsDetails() {
         {/* What will you get */}
         <div className="" style={{ borderColor: "#93c5fd" }}>
           <h3 className="lg:text-[40px] md:text-[35px] text-[30px] font-bold text-[#212121] mb-2">
-            What will you get? 
+            What will you get?
           </h3>
           <p className="text-[20px] text-[#4E4E4E] leading-[150%] mb-3">
             {singleProductData?.whatWillYouGet}
