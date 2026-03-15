@@ -161,7 +161,7 @@ export default function OrderHistorySection() {
     if (typeof product === "string") {
       return `Product #${product.slice(-6)}`;
     }
-    return product.name || `Product #${product._id.slice(-6)}`;
+    return product?.name || `Product #${product?._id.slice(-6)}`;
   };
 
   const itemRows = payments.flatMap((payment) =>
