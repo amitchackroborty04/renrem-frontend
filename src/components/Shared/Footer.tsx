@@ -2,8 +2,18 @@
 
 import { MapPin, Phone, Mail } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 
 export function Footer() {
+  const quickLinks = [
+    { name: 'Home', href: '/' },
+    { name: 'Men HRT', href: `/product-categorys/${'Men HRT'}` },
+    { name: 'Woman HRT', href: `/product-categorys/${'Women HRT'}` },
+    { name: 'Weight Loss', href: `/product-categorys/${'Weight Loss'}` },
+    { name: 'IV Therapy', href: `/product-categorys/${'IV Therapy'}` },
+    { name: 'Peptides', href: `/product-categorys/${'Peptides'}` },
+  ];
+
   return (
     <footer className="bg-blue-900 text-white py-16 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#1F5A7E' }}>
       <div className="max-w-7xl mx-auto">
@@ -23,24 +33,15 @@ export function Footer() {
           <div>
             <h4 className="text-xl font-bold mb-6">Quick Links</h4>
             <nav className="flex flex-col space-y-3">
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                Home
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                Men HRT
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                Woman HRT
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                Weight Loss
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                IV Therapy
-              </a>
-              <a href="#" className="text-blue-100 hover:text-white transition-colors">
-                Peptides
-              </a>
+              {quickLinks.map((link) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className="text-blue-100 hover:text-white transition-colors"
+                >
+                  {link.name}
+                </Link>
+              ))}
             </nav>
           </div>
 
