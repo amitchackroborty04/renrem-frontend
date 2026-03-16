@@ -27,6 +27,26 @@ interface CartItem {
   quantity: number;
 }
 
+interface CartItemApi {
+  _id?: string;
+  id?: string;
+  productId?: string;
+  name?: string;
+  description?: string;
+  price?: number;
+  image?: string | string[];
+  quantity?: number;
+  size?: string;
+  product?: {
+    _id?: string;
+    id?: string;
+    name?: string;
+    description?: string;
+    price?: number;
+    image?: string[];
+  };
+}
+
 interface Cart {
   items: CartItem[];
   subtotal: number;
@@ -93,9 +113,10 @@ function ProductsDetails() {
   const session = useSession();
   const TOKEN = session?.data?.user?.accessToken;
 
-  const { data: cartData } = useQuery({
+  const { data: cartItems = [] } = useQuery<CartItem[]>({
     queryKey: ["cart"],
     queryFn: async () => {
+      if (!TOKEN) return [];
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`,
         {
@@ -103,7 +124,22 @@ function ProductsDetails() {
         }
       );
       if (!res.ok) throw new Error("Failed to fetch cart");
-      return res.json();
+      const result = await res.json();
+      const items = (result?.data?.items ?? result?.items ?? []) as CartItemApi[];
+      if (!Array.isArray(items)) return [];
+      return items.map((item) => ({
+        id: item?._id ?? item?.id ?? "",
+        productId: item?.product?._id ?? item?.productId ?? "",
+        name: item?.product?.name ?? item?.name ?? "",
+        description: item?.product?.description ?? item?.description ?? "",
+        price: item?.product?.price ?? item?.price ?? 0,
+        image:
+          item?.product?.image?.[0] ??
+          (Array.isArray(item?.image) ? item?.image?.[0] : item?.image) ??
+          "",
+        quantity: item?.quantity ?? 1,
+        size: item?.size ?? "",
+      }));
     },
     enabled: !!TOKEN,
   });
@@ -135,10 +171,8 @@ function ProductsDetails() {
   const addToCartMutation = useMutation({
     mutationFn: async () => {
       // ✅ Duplicate check — same product already in cart?
-      const cartItems = cartData?.data?.items || cartData?.items || [];
       const alreadyInCart = cartItems.some(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (item: any) => item.productId === singleProductData?._id
+        (item) => item.productId === singleProductData?._id
       );
 
       if (alreadyInCart) {
