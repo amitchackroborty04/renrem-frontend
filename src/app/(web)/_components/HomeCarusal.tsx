@@ -199,7 +199,7 @@ const HomeCarusal = () => {
   const visible = items.slice(startIndex, startIndex + visibleCount);
 
   return (
-    <section className="py-[80px] container mx-auto px-4">
+    <section id="product" className="py-[80px] container mx-auto px-4">
       
       {/* Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// import { useSession } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -46,7 +45,6 @@ function saveToCheckoutCart(newItem: CartItem) {
     totalItems: newItem.quantity,
     savedAt: new Date().toISOString(),
   };
-
   localStorage.setItem("checkoutCart", JSON.stringify(cart));
 }
 
@@ -84,13 +82,31 @@ function ProductsDetails() {
     },
   });
 
-  // Set default selected size when data loads
   React.useEffect(() => {
     if (singleProductData?.size?.length && !selectedSize) {
       setSelectedSize(singleProductData.size[0]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [singleProductData]);
+
+  // ─── Fetch Cart (duplicate check এর জন্য) ────────────────────────────
+  const session = useSession();
+  const TOKEN = session?.data?.user?.accessToken;
+
+  const { data: cartData } = useQuery({
+    queryKey: ["cart"],
+    queryFn: async () => {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`,
+        {
+          headers: { Authorization: `Bearer ${TOKEN}` },
+        }
+      );
+      if (!res.ok) throw new Error("Failed to fetch cart");
+      return res.json();
+    },
+    enabled: !!TOKEN,
+  });
 
   // ─── Buy Now Handler ──────────────────────────────────────────────────
   const handleBuyNow = () => {
@@ -101,7 +117,7 @@ function ProductsDetails() {
     }
 
     const cartItem: CartItem = {
-      id: crypto.randomUUID(),           // unique cart entry id
+      id: crypto.randomUUID(),
       productId: singleProductData._id,
       name: singleProductData.name,
       description: singleProductData.description || "",
@@ -115,40 +131,52 @@ function ProductsDetails() {
     router.push("/checkout");
   };
 
-  const session = useSession();
-  const TOKEN = session?.data?.user?.accessToken; 
-
-
- const addToCartMutation = useMutation({
+  // ─── Add to Cart Mutation ─────────────────────────────────────────────
+  const addToCartMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
-        },
-        body: JSON.stringify({
-          productId: singleProductData?._id,
-          quantity: 1,
-        }),
-      });
+      // ✅ Duplicate check — same product already in cart?
+      const cartItems = cartData?.data?.items || cartData?.items || [];
+      const alreadyInCart = cartItems.some(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (item: any) => item.productId === singleProductData?._id
+      );
+
+      if (alreadyInCart) {
+        throw new Error("This product is already in your cart.");
+      }
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/addtocart`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${TOKEN}`,
+          },
+          body: JSON.stringify({
+            productId: singleProductData?._id,
+            quantity: 1,
+          }),
+        }
+      );
       if (!res.ok) throw new Error("Failed to add to cart");
       return res.json();
     },
-    onSuccess : () => {
-      toast.success('Add to cart Successfully!');
+    onSuccess: () => {
+      toast.success("Add to cart Successfully!");
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["cart-count"] });
     },
-
-    onError : (err) => {
+    onError: (err) => {
       toast.error(err?.message);
-    } 
+    },
   });
+
+  // ✅ Loading চলছে কিনা
+  const isAddingToCart = addToCartMutation.isPending;
 
   return (
     <div className="w-full max-w-6xl mx-auto">
-      {/* Main Content */}
       <div className="px-4 sm:px-5 py-5">
         {/* Product Top Section */}
         <div className="p-3 sm:p-4 mb-5">
@@ -176,7 +204,7 @@ function ProductsDetails() {
               ))}
             </div>
 
-            {/* Main Image with arrows */}
+            {/* Main Image */}
             <div className="order-1 lg:order-2 relative w-full max-w-[450px] aspect-square flex-shrink-0 rounded-xl overflow-hidden mx-auto lg:mx-0">
               <Image
                 width={300}
@@ -214,9 +242,11 @@ function ProductsDetails() {
                 {singleProductData?.category || "Men HRT"}
               </p>
 
-              {/* ── Size Selector ── */}
+              {/* Size Selector */}
               <div className="flex flex-wrap items-center gap-3 mb-5">
-                <span className="text-[14px] sm:text-[16px] lg:text-[20px] text-black font-normal">Size:</span>
+                <span className="text-[14px] sm:text-[16px] lg:text-[20px] text-black font-normal">
+                  Size:
+                </span>
                 <Select value={selectedSize} onValueChange={setSelectedSize}>
                   <SelectTrigger className="w-[140px] text-[14px] sm:text-[16px] text-gray-700 border-gray-300">
                     <SelectValue placeholder="Select size" />
@@ -235,7 +265,7 @@ function ProductsDetails() {
                 ${singleProductData?.price}
               </p>
 
-              {/* ── Buy now & Add to Cart Buttons ── */}
+              {/* Buttons */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full">
                 <button
                   onClick={handleBuyNow}
@@ -243,8 +273,21 @@ function ProductsDetails() {
                 >
                   Buy now
                 </button>
-                <button onClick={() => addToCartMutation.mutate()} className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[16px] sm:text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors">
-                  Add to Cart
+
+                {/* ✅ Add to Cart — loading + disabled */}
+                <button
+                  onClick={() => addToCartMutation.mutate()}
+                  disabled={isAddingToCart}
+                  className="flex-1 py-2 bg-white hover:bg-gray-50 text-gray-800 text-[16px] sm:text-[18px] font-semibold rounded-lg border border-gray-300 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isAddingToCart ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add to Cart"
+                  )}
                 </button>
               </div>
             </div>
@@ -266,4 +309,3 @@ function ProductsDetails() {
 }
 
 export default ProductsDetails;
-

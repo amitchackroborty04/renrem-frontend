@@ -204,7 +204,7 @@ export default function CartSection() {
   };
 
   const subtotal = useMemo(() => {
-    return localItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    return localItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
   }, [localItems]);
 
   const total = subtotal;

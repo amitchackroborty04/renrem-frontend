@@ -7,11 +7,13 @@ const treatmentCards = [
     title: "Erectile\nDisfunction",
     badge: "New",
     image: "/images/health1.jpg",
+    hrf : "#product"
   },
   {
     title: "Weight Control",
     badge: null,
     image: "/images/health2.jpg",
+    hrf : "/product-categorys/Weight Loss"
   },
 ];
 
@@ -58,7 +60,7 @@ export default function HealthMove() {
           {treatmentCards.map((card) => (
             <div
               key={card.title}
-              className="relative h-[280px] overflow-hidden rounded-2xl sm:h-[320px] lg:h-[350px]"
+              className="relative h-[280px] overflow-hidden sm:h-[320px] lg:h-[350px]"
             >
               <Image
                 width={800}
@@ -84,10 +86,12 @@ export default function HealthMove() {
                 </div>
 
                 <div className="flex justify-end">
-                  <button className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 sm:px-5 sm:py-2.5 sm:text-base">
-                    Start Now
-                    <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-                  </button>
+                  <a href={card.hrf}>
+                    <button className="flex items-center gap-2 rounded-full bg-black px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800 sm:px-5 sm:py-2.5 sm:text-base">
+                      Start Now
+                      <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
+                  </a>
                 </div>
               </div>
             </div>
@@ -99,7 +103,7 @@ export default function HealthMove() {
           {quickLinks.map((link) => (
             <div
               key={link.label}
-              className="flex min-h-[140px] items-center justify-between gap-4 rounded-2xl bg-[#EEE9E4] px-4 py-5 shadow-sm sm:min-h-[160px] sm:px-5 lg:h-[184px]"
+              className="flex min-h-[140px] items-center justify-between gap-4 bg-[#EEE9E4] px-4 py-5 shadow-sm sm:min-h-[160px] sm:px-5 lg:h-[184px]"
             >
               <span className="whitespace-pre-line text-lg font-medium leading-snug text-[#131313] sm:text-xl lg:text-2xl">
                 {link.label}
@@ -107,7 +111,7 @@ export default function HealthMove() {
 
               <button className="flex h-10 w-10 px-8 flex-shrink-0 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-neutral-800">
                 <span>
-                <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-4 w-4" />
                 </span>
               </button>
             </div>
@@ -115,11 +119,11 @@ export default function HealthMove() {
         </div>
 
         {/* Steps */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 mt-[50px]">
           {steps.map((step) => (
             <div
               key={step.num}
-              className="flex min-h-[170px] flex-col justify-center rounded-2xl bg-[#E3E3E6] px-4 py-5 sm:px-5 lg:h-[194px]"
+              className="flex min-h-[170px] flex-col justify-center bg-[#E3E3E6] px-4 py-5 sm:px-5 lg:h-[194px]"
             >
               <p className="mb-2 text-lg font-semibold text-[#131313] sm:text-xl">
                 {step.num} {step.title}

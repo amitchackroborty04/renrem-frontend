@@ -36,7 +36,7 @@ export default function IvTherapySection({ category }: IvTherapySectionProps) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTreatment, setActiveTreatment] = useState<Treatment | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
   const [isCompleted, setIsCompleted] = useState(false);
 
   const allQuestions: (TreatmentQuestion & { benefitTitle: string })[] =
@@ -53,8 +53,17 @@ export default function IvTherapySection({ category }: IvTherapySectionProps) {
       : 0;
 
   const handleOptionSelect = (questionId: string, option: string) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: option }));
-  };
+  setSelectedAnswers((prev) => {
+    const current = prev[questionId] || [];
+    const alreadySelected = current.includes(option);
+    return {
+      ...prev,
+      [questionId]: alreadySelected
+        ? current.filter((o) => o !== option)
+        : [...current, option],
+    };
+  });
+};
 
   const handleNext = () => {
     if (currentQuestionIndex < totalQuestions - 1) {
@@ -86,9 +95,9 @@ export default function IvTherapySection({ category }: IvTherapySectionProps) {
     setShowQuiz(true);
   };
 
-  const isCurrentAnswered = currentQuestion
-    ? !!selectedAnswers[currentQuestion._id]
-    : false;
+ const isCurrentAnswered = currentQuestion
+  ? (selectedAnswers[currentQuestion._id] || []).length > 0
+  : false;
 
   return (
     <>
@@ -255,8 +264,7 @@ export default function IvTherapySection({ category }: IvTherapySectionProps) {
               {/* Options */}
               <div className="space-y-3">
                 {currentQuestion?.options.map((option, i) => {
-                  const isSelected =
-                    selectedAnswers[currentQuestion._id] === option;
+                  const isSelected = (selectedAnswers[currentQuestion._id] || []).includes(option);
                   return (
                     <button
                       key={i}

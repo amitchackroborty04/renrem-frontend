@@ -35,12 +35,10 @@ export default function IvTherapyBenefitsSection({
   // ── Quiz state ──────────────────────────────────────────────────────
   const [showQuiz, setShowQuiz] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<
-    Record<string, string>
-  >({});
+  // ✅ string → string[] (multiple select)
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string[]>>({});
   const [isCompleted, setIsCompleted] = useState(false);
 
-  // Flatten all questions from all benefits
   const allQuestions: (TreatmentQuestion & { benefitTitle: string })[] =
     benefitItems.flatMap((item) =>
       (item.treatmentQuestions || []).map((q) => ({
@@ -56,8 +54,18 @@ export default function IvTherapyBenefitsSection({
       ? Math.round((currentQuestionIndex / totalQuestions) * 100)
       : 0;
 
+  // ✅ Toggle select/deselect
   const handleOptionSelect = (questionId: string, option: string) => {
-    setSelectedAnswers((prev) => ({ ...prev, [questionId]: option }));
+    setSelectedAnswers((prev) => {
+      const current = prev[questionId] || [];
+      const alreadySelected = current.includes(option);
+      return {
+        ...prev,
+        [questionId]: alreadySelected
+          ? current.filter((o) => o !== option)
+          : [...current, option],
+      };
+    });
   };
 
   const handleNext = () => {
@@ -81,32 +89,26 @@ export default function IvTherapyBenefitsSection({
     setIsCompleted(false);
   };
 
+  // ✅ কমপক্ষে ১টা selected থাকলেই Next চালু
   const isCurrentAnswered = currentQuestion
-    ? !!selectedAnswers[currentQuestion._id]
+    ? (selectedAnswers[currentQuestion._id] || []).length > 0
     : false;
 
-  // ── Render ──────────────────────────────────────────────────────────
   return (
     <>
       <section className="w-full py-12 sm:py-16 lg:py-20">
         <div className="mx-auto container px-4 sm:px-6 lg:px-8">
-          {/* Content */}
           <div className="mt-10 space-y-8 sm:mt-12 sm:space-y-10">
             {benefitItems.length > 0 ? (
               benefitItems.map((item) => (
                 <div key={item._id}>
                   <h3
                     className="text-[28px] font-semibold leading-tight text-[#131313] sm:text-[38px] lg:text-[40px]"
-                    dangerouslySetInnerHTML={{
-                      __html: item.title || "",
-                    }}
+                    dangerouslySetInnerHTML={{ __html: item.title || "" }}
                   />
-
                   <p
                     className="mt-4 text-sm leading-7 text-[#222] sm:text-[18px]"
-                    dangerouslySetInnerHTML={{
-                      __html: item.description || "",
-                    }}
+                    dangerouslySetInnerHTML={{ __html: item.description || "" }}
                   />
                 </div>
               ))
@@ -117,7 +119,6 @@ export default function IvTherapyBenefitsSection({
             )}
           </div>
 
-          {/* Button */}
           <div className="mt-10 flex justify-center sm:mt-14">
             <button
               type="button"
@@ -142,7 +143,6 @@ export default function IvTherapyBenefitsSection({
           {/* ── Completed State ── */}
           {isCompleted ? (
             <div className="relative w-full max-w-[820px] rounded-2xl bg-[#f0f2f5] shadow-2xl overflow-hidden">
-              {/* Close button */}
               <button
                 onClick={handleClose}
                 className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md text-red-600 hover:text-red-800 transition-all text-2xl font-bold"
@@ -151,7 +151,6 @@ export default function IvTherapyBenefitsSection({
               </button>
 
               <div className="flex flex-col md:flex-row items-stretch">
-                {/* Left — Text */}
                 <div className="flex-1 px-10 py-12 md:py-16">
                   <h2 className="mb-5 text-[26px] font-bold leading-tight text-[#131313] sm:text-[30px] lg:text-[34px]">
                     You have low testosterone
@@ -187,7 +186,6 @@ export default function IvTherapyBenefitsSection({
                   </button>
                 </div>
 
-                {/* Right — Image */}
                 <div className="w-full md:w-[340px] lg:w-[360px] flex-shrink-0">
                   <div className="relative h-[260px] w-full md:h-full">
                     <Image
@@ -206,7 +204,6 @@ export default function IvTherapyBenefitsSection({
               className="relative w-full max-w-[600px] rounded-2xl bg-[#f0f2f5] px-8 py-10 shadow-2xl"
               style={{ maxHeight: "90vh", overflowY: "auto" }}
             >
-              {/* Close button */}
               <button
                 onClick={handleClose}
                 className="absolute right-5 top-5 flex h-10 w-10 items-center justify-center rounded-full bg-white text-red-600 hover:bg-gray-200 hover:text-gray-700 transition-all text-2xl font-semibold shadow-md"
@@ -216,7 +213,7 @@ export default function IvTherapyBenefitsSection({
 
               {/* Progress bar */}
               <div className="my-10">
-                <div className="mb-1 flex items-center justify-between text-xs text-gray-400 ">
+                <div className="mb-1 flex items-center justify-between text-xs text-gray-400">
                   <span>
                     Question {currentQuestionIndex + 1} of {totalQuestions}
                   </span>
@@ -235,14 +232,15 @@ export default function IvTherapyBenefitsSection({
                 {currentQuestion?.question}
               </h2>
               <p className="mb-8 text-center text-sm text-gray-500">
-                Let&apos;s get you back to feeling your best.
+                Select all that apply.
               </p>
 
-              {/* Options */}
+              {/* ✅ Options — Multiple Select with Checkbox */}
               <div className="space-y-3">
                 {currentQuestion?.options.map((option, i) => {
-                  const isSelected =
-                    selectedAnswers[currentQuestion._id] === option;
+                  const isSelected = (
+                    selectedAnswers[currentQuestion._id] || []
+                  ).includes(option);
                   return (
                     <button
                       key={i}
@@ -257,16 +255,28 @@ export default function IvTherapyBenefitsSection({
                           : "1.5px solid #d1d5db",
                       }}
                     >
-                      {/* Radio circle */}
+                      {/* ✅ Checkbox style */}
                       <div
-                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all"
+                        className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border-2 transition-all"
                         style={{
                           borderColor: isSelected ? "#1239e6" : "#9ca3af",
-                          background: "transparent",
+                          background: isSelected ? "#1239e6" : "transparent",
                         }}
                       >
                         {isSelected && (
-                          <div className="h-3 w-3 rounded-full bg-[#1239e6]" />
+                          <svg
+                            className="h-3.5 w-3.5 text-white"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
                         )}
                       </div>
                       <span className="text-[15px] text-[#222]">{option}</span>
@@ -292,9 +302,7 @@ export default function IvTherapyBenefitsSection({
                   disabled={!isCurrentAnswered}
                   className="flex-1 h-[48px] rounded-full bg-[#1239e6] text-sm font-medium text-white transition hover:bg-[#0f31c9] disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {currentQuestionIndex === totalQuestions - 1
-                    ? "Submit"
-                    : "Next"}
+                  {currentQuestionIndex === totalQuestions - 1 ? "Submit" : "Next"}
                 </button>
               </div>
             </div>
