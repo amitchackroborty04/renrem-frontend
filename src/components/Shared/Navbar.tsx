@@ -259,14 +259,15 @@ const Navbar = () => {
 
               <SheetContent
                 side="right"
+                className="flex h-full flex-col overflow-hidden p-0"
               >
-                <SheetHeader className="border-b border-gray-100 px-6 py-5 text-left">
+                <SheetHeader className="shrink-0 border-b border-gray-100 px-6 py-5 text-left ">
                   <SheetTitle className="text-left text-lg font-semibold text-[#131313]">
                     Menu
                   </SheetTitle>
                 </SheetHeader>
 
-                <div className="flex h-full flex-col overflow-y-auto px-4 pb-6 pt-4">
+                <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-4 pb-6 pt-4">
                   {/* Main Links */}
                   <div className="space-y-2">
                     {mainLinks.map((link) => {
