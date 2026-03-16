@@ -133,24 +133,28 @@ export default function CartSection() {
   const [deleteTarget, setDeleteTarget] = useState<CartItem | null>(null);
 
   useEffect(() => {
-    setLocalItems(cartItems);
+    setLocalItems(Array.isArray(cartItems) ? cartItems : []);
   }, [cartItems]);
 
   const handleIncrease = (id: string) => {
     setLocalItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
+      Array.isArray(items)
+        ? items.map((item) =>
+            item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+          )
+        : []
     );
   };
 
   const handleDecrease = (id: string) => {
     setLocalItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity - 1) }
-          : item
-      )
+      Array.isArray(items)
+        ? items.map((item) =>
+            item.id === id
+              ? { ...item, quantity: Math.max(1, item.quantity - 1) }
+              : item
+          )
+        : []
     );
   };
 
@@ -185,7 +189,11 @@ export default function CartSection() {
       return response.json().catch(() => ({}));
     },
     onSuccess: (_data, item) => {
-      setLocalItems((items) => items.filter((cartItem) => cartItem.id !== item.id));
+      setLocalItems((items) =>
+        Array.isArray(items)
+          ? items.filter((cartItem) => cartItem.id !== item.id)
+          : []
+      );
       setDeleteTarget(null);
       toast.success("Item removed from cart");
       queryClient.invalidateQueries({ queryKey: ["cart"] });
@@ -203,20 +211,22 @@ export default function CartSection() {
     deleteMutation.mutate(deleteTarget);
   };
 
+  const safeItems = Array.isArray(localItems) ? localItems : [];
+
   const subtotal = useMemo(() => {
-    return localItems?.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  }, [localItems]);
+    return safeItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [safeItems]);
 
   const total = subtotal;
 
   const totalItems = useMemo(() => {
-    return localItems.reduce((sum, item) => sum + item.quantity, 0);
-  }, [localItems]);
+    return safeItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [safeItems]);
 
   const handleCheckout = () => {
     if (typeof window === "undefined") return;
     const payload = {
-      items: localItems,
+      items: safeItems,
       subtotal,
       total,
       totalItems,
@@ -249,8 +259,8 @@ export default function CartSection() {
                   <CartItemSkeleton />
                   <CartItemSkeleton />
                 </>
-              ) : localItems.length > 0 ? (
-                localItems.map((item) => (
+              ) : safeItems.length > 0 ? (
+                safeItems.map((item) => (
                   <div
                     key={item.id}
                     className="rounded-[14px] bg-[#EAEEFF] p-3 sm:p-4"
@@ -368,7 +378,7 @@ export default function CartSection() {
                 <button
                   type="button"
                   className="mt-6 inline-flex h-[48px] w-full items-center justify-center rounded-[8px] bg-[#0024DA] px-6 text-base font-medium text-white transition hover:bg-[#0f31c9]"
-                  disabled={localItems.length === 0 || isLoading}
+                  disabled={safeItems.length === 0 || isLoading}
                   onClick={handleCheckout}
                 >
                   Checkout
