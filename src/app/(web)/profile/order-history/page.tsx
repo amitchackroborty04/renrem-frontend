@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   Table,
@@ -9,8 +10,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Eye } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+} from "@/components/ui/pagination";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 // ────────────────────────────────────────────────
 // Types
@@ -59,9 +68,15 @@ interface ApiResponse {
   data: Payment[];
 }
 
+const PAGE_SIZE = 10;
+
 // ────────────────────────────────────────────────
 // Fetch function using native fetch
-const fetchPayments = async (token: string): Promise<ApiResponse> => {
+const fetchPayments = async (
+  token: string,
+  page: number,
+  limit: number,
+): Promise<ApiResponse> => {
   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_API_URL;
   if (!baseUrl) {
     throw new Error("Missing NEXT_PUBLIC_BACKEND_API_URL");
@@ -72,7 +87,12 @@ const fetchPayments = async (token: string): Promise<ApiResponse> => {
     Authorization: `Bearer ${token}`,
   };
 
-  const response = await fetch(`${baseUrl}/payment`, {
+  const params = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
+
+  const response = await fetch(`${baseUrl}/payment?${params.toString()}`, {
     method: "GET",
     headers,
   });
@@ -86,6 +106,44 @@ const fetchPayments = async (token: string): Promise<ApiResponse> => {
     throw new Error(data.message || "Failed to load payments");
   }
   return data;
+};
+
+const buildPaginationItems = (
+  currentPage: number,
+  totalPages: number,
+): Array<number | "ellipsis"> => {
+  if (totalPages <= 1) {
+    return [];
+  }
+  if (totalPages <= 5) {
+    return Array.from({ length: totalPages }, (_, index) => index + 1);
+  }
+
+  const pages: Array<number | "ellipsis"> = [];
+  const leftSibling = Math.max(currentPage - 1, 1);
+  const rightSibling = Math.min(currentPage + 1, totalPages);
+  const showLeftEllipsis = leftSibling > 2;
+  const showRightEllipsis = rightSibling < totalPages - 1;
+
+  pages.push(1);
+
+  if (showLeftEllipsis) {
+    pages.push("ellipsis");
+  }
+
+  for (let pageNumber = leftSibling; pageNumber <= rightSibling; pageNumber += 1) {
+    if (pageNumber !== 1 && pageNumber !== totalPages) {
+      pages.push(pageNumber);
+    }
+  }
+
+  if (showRightEllipsis) {
+    pages.push("ellipsis");
+  }
+
+  pages.push(totalPages);
+
+  return pages;
 };
 
 // ────────────────────────────────────────────────
@@ -145,16 +203,35 @@ export default function OrderHistorySection() {
   const { data: session, status } = useSession();
   const token = session?.user?.accessToken as string | undefined;
   const isAuthed = status === "authenticated" && !!token;
+  const [page, setPage] = useState(1);
 
-  const { data, isLoading, error } = useQuery<ApiResponse, Error>({
-    queryKey: ["payments", token],
-    queryFn: () => fetchPayments(token as string),
+  useEffect(() => {
+    if (!isAuthed) {
+      setPage(1);
+    }
+  }, [isAuthed]);
+
+  const { data, isLoading, isFetching, error } = useQuery<ApiResponse, Error>({
+    queryKey: ["payments", token, page, PAGE_SIZE],
+    queryFn: () => fetchPayments(token as string, page, PAGE_SIZE),
     enabled: isAuthed,
     staleTime: 3 * 60 * 1000, // 3 minutes
   });
 
+  const meta = data?.meta;
+  const total = meta?.total ?? 0;
+  const limit = meta?.limit ?? PAGE_SIZE;
+  const totalPages = total > 0 ? Math.ceil(total / limit) : 0;
+  const paginationItems = buildPaginationItems(page, totalPages);
+
+  useEffect(() => {
+    if (totalPages > 0 && page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
+
   const payments = data?.data ?? [];
-  const isPending = isLoading || status === "loading";
+  const isPending = isLoading || isFetching || status === "loading";
 
   const formatMoney = (value: number) => `$${value.toFixed(2)}`;
   const getProductLabel = (product: PaymentItem["product"]) => {
@@ -177,6 +254,13 @@ export default function OrderHistorySection() {
       month: "short",
       day: "numeric",
     });
+
+  const handlePageChange = (nextPage: number) => {
+    if (nextPage < 1 || nextPage > totalPages || nextPage === page) {
+      return;
+    }
+    setPage(nextPage);
+  };
 
   if (error) {
     return (
@@ -253,6 +337,8 @@ export default function OrderHistorySection() {
                       {formatDate(payment.createdAt)}
                     </TableCell>
                     <TableCell className="pr-8 text-center">
+                      <Link
+                        href={`/profile/order-history/${payment._id}`}>
                       <button
                         type="button"
                         className="inline-flex h-9 w-9 items-center justify-center rounded-full transition hover:bg-[#f1f5f9]"
@@ -260,6 +346,7 @@ export default function OrderHistorySection() {
                       >
                         <Eye className="h-4.5 w-4.5 text-[#222]" />
                       </button>
+                      </Link>
                     </TableCell>
                   </TableRow>
                 ))
@@ -320,6 +407,61 @@ export default function OrderHistorySection() {
             ))
           )}
         </div>
+
+        {totalPages > 1 ? (
+          <div className="mt-6 rounded-[12px] border border-[#e8e8e8] bg-white px-4 py-3 shadow-sm sm:px-6">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-nowrap font-medium text-[#64748b]">
+                Page {page} of {totalPages} • Total {total} orders
+              </p>
+
+              <Pagination className="sm:mx-0 sm:justify-end">
+                <PaginationContent className="flex-wrap justify-center">
+                  <PaginationItem>
+                    <PaginationLink
+                      aria-label="Previous page"
+                      className="h-9 w-9 rounded-[6px] border border-[#e2e8f0] bg-white p-0 hover:bg-[#f1f5f9]"
+                      disabled={page === 1 || isPending}
+                      onClick={() => handlePageChange(page - 1)}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </PaginationLink>
+                  </PaginationItem>
+
+                  {paginationItems.map((item, index) =>
+                    item === "ellipsis" ? (
+                      <PaginationItem key={`ellipsis-${index}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={item}>
+                        <PaginationLink
+                          className="h-9 w-9 rounded-[6px] border border-[#e2e8f0] bg-white p-0 text-[14px] font-semibold hover:bg-[#f1f5f9]"
+                          isActive={item === page}
+                          disabled={item === page || isPending}
+                          onClick={() => handlePageChange(item)}
+                        >
+                          {item}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )}
+
+                  <PaginationItem>
+                    <PaginationLink
+                      aria-label="Next page"
+                      className="h-9 w-9 rounded-[6px] border border-[#e2e8f0] bg-white p-0 hover:bg-[#f1f5f9]"
+                      disabled={page === totalPages || isPending}
+                      onClick={() => handlePageChange(page + 1)}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </PaginationLink>
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
