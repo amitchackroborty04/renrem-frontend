@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 const treatmentCards = [
@@ -18,9 +19,9 @@ const treatmentCards = [
 ];
 
 const quickLinks = [
-  { label: "Check your\ninsutance - free" },
-  { label: "See how much\nyou could lose" },
-  { label: "Explore all\nmedications" },
+  { label: "Check your\ninsutance - free", href: "/contact-us" },
+  { label: "See how much\nyou could lose", href: "/product-categorys/Weight%20Loss" },
+  { label: "Explore all\nmedications", href: "#product" },
 ];
 
 const steps = [
@@ -49,7 +50,7 @@ const steps = [
 export default function HealthMove() {
   return (
     <section className="w-full py-10 sm:py-12 lg:py-16">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-2">
         {/* Heading */}
         <h1 className="mb-6 text-[28px] font-bold leading-tight tracking-tight text-[#0024DA] sm:mb-8 sm:text-[36px] md:text-[42px] lg:text-[48px]">
           YOUR HEALTH. YOUR MOVE.
@@ -108,12 +109,13 @@ export default function HealthMove() {
               <span className="whitespace-pre-line text-lg font-medium leading-snug text-[#131313] sm:text-xl lg:text-2xl">
                 {link.label}
               </span>
-
+              <Link href={link.href}>
               <button className="flex h-10 w-10 px-8 flex-shrink-0 items-center justify-center rounded-full bg-black text-white transition-colors hover:bg-neutral-800">
                 <span>
                   <ArrowRight className="h-4 w-4" />
                 </span>
               </button>
+              </Link>
             </div>
           ))}
         </div>
