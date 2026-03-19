@@ -8,7 +8,7 @@ const treatmentCards = [
     title: "Erectile\nDisfunction",
     badge: "New",
     image: "/images/health1.jpg",
-    hrf : "#product"
+    hrf : "/product-categorys/Peptides"
   },
   {
     title: "Weight Control",

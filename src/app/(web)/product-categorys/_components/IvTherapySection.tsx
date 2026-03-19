@@ -117,39 +117,39 @@ export default function IvTherapySection({ category }: IvTherapySectionProps) {
           </div>
 
           {/* Cards */}
-          <div className="mt-10 grid grid-cols-1 gap-5 sm:mt-12 md:grid-cols-2 lg:grid-cols-3 lg:gap-6">
-            {treatments.map((plan) => (
-              <div
-                key={plan._id}
-                className="flex h-full flex-col rounded-[18px] border border-[#C3C3C3] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] sm:p-7"
-              >
-                <div className="flex-1">
-                  <h3
-                    className="text-[24px] font-semibold leading-snug text-[#131313] sm:text-[28px] lg:text-[20px] xl:text-[22px]"
-                    dangerouslySetInnerHTML={{ __html: plan.name || "" }}
-                  />
-                  <p
-                    className="mt-5 text-sm leading-6 text-[#131313] sm:text-[15px]"
-                    dangerouslySetInnerHTML={{ __html: plan.description || "" }}
-                  />
-                </div>
+        <div className="mt-10 flex flex-wrap justify-center gap-6 sm:mt-12">
+  {treatments.map((plan) => (
+    <div
+      key={plan._id}
+      className="w-full sm:w-[48%] lg:w-[31%] max-w-[360px] flex flex-col rounded-[18px] border border-[#C3C3C3] bg-white p-6 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_10px_24px_rgba(0,0,0,0.08)] sm:p-7"
+    >
+      <div className="flex-1">
+        <h3
+          className="text-[24px] font-semibold leading-snug text-[#131313] sm:text-[28px] lg:text-[20px] xl:text-[22px]"
+          dangerouslySetInnerHTML={{ __html: plan.name || "" }}
+        />
+        <p
+          className="mt-5 text-sm leading-6 text-[#131313] sm:text-[15px]"
+          dangerouslySetInnerHTML={{ __html: plan.description || "" }}
+        />
+      </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleOpenQuiz(plan)}
-                  className="mt-8 inline-flex h-[50px] w-full items-center justify-center rounded-full bg-[#0024DA] px-6 text-base font-medium text-white transition hover:bg-[#0c2fcb] sm:h-[54px]"
-                >
-                  Customize Your Treatment
-                </button>
-              </div>
-            ))}
+      <button
+        type="button"
+        onClick={() => handleOpenQuiz(plan)}
+        className="mt-8 inline-flex h-[50px] w-full items-center justify-center rounded-full bg-[#0024DA] px-6 text-base font-medium text-white transition hover:bg-[#0c2fcb] sm:h-[54px]"
+      >
+        Customize Your Treatment
+      </button>
+    </div>
+  ))}
 
-            {treatments.length === 0 && (
-              <p className="text-center text-gray-500 col-span-full">
-                No treatments available for this category.
-              </p>
-            )}
-          </div>
+  {treatments.length === 0 && (
+    <p className="text-center text-gray-500 w-full">
+      No treatments available for this category.
+    </p>
+  )}
+</div>
         </div>
       </section>
 
