@@ -19,8 +19,9 @@ const contactInfo = [
     id: 3,
     icon: MapPin,
     title: "Head Office",
-    line1: "850 NW 42nd Ave Ste #204",
-    line2: "Miami, FL 33126",
+    // line1: "850 NW 42nd Ave Ste #204",
+    // line2: "Miami, FL 33126",
+    line2:"Miami, Florida"
   },
 ];
 

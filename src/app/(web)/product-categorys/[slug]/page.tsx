@@ -8,7 +8,7 @@ import IvTherapyBenefitsSection from "../_components/IvTherapyBenefitsSection";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
-// ─── Hero Data Mapping ────────────────────────────────────────────────────────
+// ─── Hero Data Mapping ───────────────────────────
 
 const categoryHeroData: Record<
   string,
